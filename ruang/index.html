@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kantor Virtual Agen 3D — Luna &amp; Mona</title>
+<meta name="description" content="Ruang kerja 3D interaktif: kantor virtual tempat agen AI bekerja, rapat, ngopi, dan main ping-pong. Demo visual, bukan data live.">
+<meta name="theme-color" content="#080b11">
+<meta property="og:title" content="Kantor Virtual Agen 3D">
+<meta property="og:description" content="Ruang kerja 3D interaktif untuk agen AI — seret untuk memutar, klik agen untuk detail.">
+<style>
+:root{
+  --bg:#080b11; --panel:rgba(13,18,27,.88); --panel-2:rgba(19,26,38,.92);
+  --line:rgba(148,163,184,.16); --line-2:rgba(94,234,212,.34);
+  --txt:#e7eef7; --txt-dim:#94a3b8; --txt-mute:#67748a;
+  --acc:#5eead4; --acc-2:#8b8cf8; --warn:#f0a23c;
+  --r:14px; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+canvas{display:block;position:fixed;inset:0;touch-action:none}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+#scene{position:fixed;inset:0}
+
+/* ---------- top bar ---------- */
+.top{position:fixed;top:0;left:0;right:0;z-index:20;padding:10px 12px 0;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.row{display:flex;gap:8px;align-items:center}
+.row.chips{overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.row.chips::-webkit-scrollbar{display:none}
+.brand{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:8px 12px;backdrop-filter:blur(14px);pointer-events:auto;flex:0 0 auto}
+.brand b{font-size:13.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:650;white-space:nowrap}
+.brand span{color:var(--txt-mute);font-size:11px;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc);
+  animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.82)}}
+.chip{flex:0 0 auto;display:flex;align-items:baseline;gap:7px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:7px 11px;backdrop-filter:blur(14px);pointer-events:auto;white-space:nowrap}
+.chip u{text-decoration:none;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--txt-mute)}
+.chip b{font-size:13px;font-weight:650;font-family:var(--mono)}
+.chip.demo b{color:var(--warn)}
+.spacer{flex:1 1 auto;min-width:0}
+.tools{display:flex;gap:6px;pointer-events:auto;flex:0 0 auto}
+.tb{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 11px;
+  backdrop-filter:blur(14px);font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--txt-dim);
+  transition:.16s;white-space:nowrap}
+.tb:hover{color:var(--txt);border-color:var(--line-2)}
+.tb.on{color:#07130f;background:var(--acc);border-color:var(--acc);font-weight:700}
+@media(max-width:720px){.brand span{display:none}.tb .lbl{display:none}.tb{padding:9px 10px}}
+
+/* ---------- hint ---------- */
+.hint{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:20;
+  background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 14px;
+  backdrop-filter:blur(14px);font-size:11.5px;color:var(--txt-dim);white-space:nowrap;
+  max-width:calc(100vw - 24px);overflow:hidden;text-overflow:ellipsis}
+.hint b{color:var(--acc);font-weight:600}
+@media(max-width:720px){.hint{font-size:10.5px;padding:7px 11px}}
+
+/* ---------- side panel ---------- */
+.panel{position:fixed;top:0;right:0;bottom:0;width:352px;z-index:30;background:var(--panel-2);
+  border-left:1px solid var(--line);backdrop-filter:blur(20px);display:flex;flex-direction:column;
+  transform:translateX(105%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
+.panel.open{transform:none}
+.panel header{display:flex;align-items:center;gap:6px;padding:12px 12px 10px;border-bottom:1px solid var(--line)}
+.tab{padding:7px 12px;border-radius:9px;font-size:12px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--txt-mute)}
+.tab.on{background:rgba(94,234,212,.13);color:var(--acc)}
+.x{margin-left:auto;width:30px;height:30px;border-radius:8px;color:var(--txt-mute);font-size:16px;line-height:1}
+.x:hover{color:var(--txt);background:rgba(148,163,184,.10)}
+.panel .body{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;flex:1}
+.grp{border:1px solid var(--line);border-radius:var(--r);background:rgba(255,255,255,.017);overflow:hidden}
+.grp>h4{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-mute);
+  padding:9px 12px;border-bottom:1px solid var(--line);font-weight:650}
+.person{display:flex;align-items:center;gap:11px;padding:11px 12px;border-bottom:1px solid rgba(148,163,184,.07);
+  cursor:pointer;transition:.15s;text-align:left;width:100%}
+.person:last-child{border-bottom:none}
+.person:hover{background:rgba(94,234,212,.06)}
+.av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:14px;font-weight:700;
+  color:#06121a;flex:0 0 auto;font-family:var(--mono)}
+.person .meta{min-width:0;flex:1}
+.person .nm{font-size:13.5px;font-weight:620;letter-spacing:-.1px;display:flex;align-items:center;gap:6px}
+.person .rl{font-size:11.5px;color:var(--txt-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:6px;
+  border:1px solid;font-weight:700;flex:0 0 auto;font-family:var(--mono)}
+.st.work{color:var(--acc);border-color:rgba(94,234,212,.4);background:rgba(94,234,212,.1)}
+.st.idle{color:var(--txt-dim);border-color:var(--line);background:rgba(148,163,184,.08)}
+.st.plan{color:var(--warn);border-color:rgba(240,162,60,.35);background:rgba(240,162,60,.09)}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;font-size:12.5px;
+  border-bottom:1px solid rgba(148,163,184,.07)}
+.kv:last-child{border-bottom:none}
+.kv i{color:var(--txt-mute);font-style:normal;font-size:11.5px;letter-spacing:.04em}
+.kv b{font-family:var(--mono);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr}
+.grid2 .kv{flex-direction:column;gap:3px;border-right:1px solid rgba(148,163,184,.07)}
+.grid2 .kv:nth-child(2n){border-right:none}
+.grid2 .kv b{font-size:16px}
+.bar{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:11.5px;font-family:var(--mono)}
+.bar i{font-style:normal;color:var(--txt-dim);width:82px;flex:0 0 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .track{flex:1;height:7px;border-radius:5px;background:rgba(148,163,184,.13);overflow:hidden}
+.bar .fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--acc),var(--acc-2))}
+.bar span{color:var(--txt-mute);width:34px;text-align:right;flex:0 0 auto}
+.note{font-size:11px;color:var(--txt-mute);line-height:1.55;padding:11px 12px}
+.note b{color:var(--warn);font-weight:650}
+@media(max-width:720px){
+  .panel{top:auto;left:0;right:0;width:auto;height:66vh;border-left:none;border-top:1px solid var(--line);
+    border-radius:18px 18px 0 0;transform:translateY(105%)}
+  .panel.open{transform:none}
+  .hint{bottom:calc(66vh + 10px)}
+  .hint.hide{display:none}
+}
+
+/* ---------- agent dialog ---------- */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(4,7,11,.6);backdrop-filter:blur(3px);
+  display:none;place-items:center;padding:16px}
+.scrim.open{display:grid}
+.dlg{width:100%;max-width:440px;background:var(--panel-2);border:1px solid var(--line);border-radius:18px;
+  backdrop-filter:blur(20px);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6);
+  animation:pop .22s cubic-bezier(.3,1.4,.5,1)}
+@keyframes pop{from{transform:scale(.94) translateY(8px);opacity:0}}
+.dlg .hd{padding:18px 18px 14px;display:flex;align-items:center;gap:13px;border-bottom:1px solid var(--line)}
+.dlg .hd .av{width:46px;height:46px;border-radius:13px;font-size:19px}
+.dlg h3{font-size:17px;font-weight:660;letter-spacing:-.2px}
+.dlg .sub{font-size:12px;color:var(--txt-mute);margin-top:2px}
+.dlg .bd{padding:4px 0 8px;max-height:52vh;overflow-y:auto}
+.dlg .ft{padding:12px 16px 16px;display:flex;gap:8px;border-top:1px solid var(--line)}
+.btn{flex:1;padding:11px;border-radius:11px;border:1px solid var(--line);font-size:12.5px;font-weight:640;
+  color:var(--txt-dim);transition:.16s}
+.btn:hover{color:var(--txt);border-color:var(--line-2)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#07130f}
+.btn.pri:hover{filter:brightness(1.08)}
+
+/* ---------- loader + footer credit ---------- */
+.load{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);
+  transition:opacity .5s;text-align:center;padding:20px}
+.load.gone{opacity:0;pointer-events:none}
+.load .spin{width:38px;height:38px;margin:0 auto 16px;border-radius:50%;
+  border:2px solid rgba(94,234,212,.2);border-top-color:var(--acc);animation:rot .9s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.load b{font-size:13px;letter-spacing:.2em;text-transform:uppercase;display:block}
+.load p{margin-top:9px;font-size:11.5px;color:var(--txt-mute)}
+.credit{position:fixed;left:12px;bottom:12px;z-index:20;font-size:10.5px;color:var(--txt-mute);
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 10px;
+  backdrop-filter:blur(14px);max-width:46vw;line-height:1.5}
+.credit a{color:var(--txt-dim);text-decoration:none}
+.credit a:hover{color:var(--acc)}
+@media(max-width:720px){.credit{bottom:calc(66vh + 10px);max-width:60vw;font-size:10px}
+  .panel.open ~ .credit,.credit.hide{display:none}}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+
+<div class="top">
+  <div class="row">
+    <a class="brand" href="../" title="Kembali ke beranda" style="text-decoration:none;color:inherit;cursor:pointer"><span class="dot"></span><b>Ruang Agen</b><span>/ kantor virtual 3D</span><span style="color:var(--txt-mute)">← kembali</span></a>
+    <div class="spacer"></div>
+    <div class="tools">
+      <button class="tb" id="btnTour" title="Tur kamera otomatis"><span>🎬</span><span class="lbl"> Tour</span></button>
+      <button class="tb" id="btnLight" title="Siang / malam"><span id="lightIcon">☀️</span><span class="lbl"> Siang</span></button>
+      <button class="tb" id="btnReset" title="Kembalikan sudut pandang"><span>⟳</span><span class="lbl"> Reset</span></button>
+      <button class="tb" id="btnPanel" title="Panel kru &amp; statistik"><span>📋</span><span class="lbl"> Panel</span></button>
+    </div>
+  </div>
+  <div class="row chips" id="chips"></div>
+</div>
+
+<div class="hint" id="hint">
+  <b>Seret</b> untuk memutar · <b>gulir</b> untuk zoom · <b>seret kanan</b> untuk geser · <b>klik agen</b> untuk detail
+</div>
+
+<aside class="panel" id="panel">
+  <header>
+    <button class="tab on" data-tab="kru">Kru</button>
+    <button class="tab" data-tab="stat">Statistik</button>
+    <button class="tab" data-tab="lokal">Status</button>
+    <button class="x" id="btnClose" aria-label="Tutup">✕</button>
+  </header>
+  <div class="body" id="panelBody"></div>
+</aside>
+
+<div class="credit" id="credit">Demo visual statis — angka &amp; aktivitas bersifat contoh, bukan data live.<br>Terinspirasi <a href="https://github.com/yugienugraha/ruang" target="_blank" rel="noopener">Ruang</a> (MIT) · dibuat oleh Luna.</div>
+
+<div class="scrim" id="scrim"><div class="dlg" id="dlg"></div></div>
+
+<div class="load" id="load">
+  <div>
+    <div class="spin"></div>
+    <b>Membangun ruang…</b>
+    <p>Menyiapkan lantai, meja, dan kru agen</p>
+  </div>
+</div>
+
+<noscript><p style="padding:24px;font-size:14px">Halaman ini butuh JavaScript aktif untuk menampilkan kantor 3D.</p></noscript>
+
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

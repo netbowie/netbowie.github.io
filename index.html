@@ -104,6 +104,9 @@
     background:rgba(94,234,212,.1);border:1px solid var(--line-2);margin-bottom:14px}
   .card h3{font-size:17px;margin-bottom:7px;letter-spacing:-.2px;font-weight:620}
   .card p{font-size:14.5px;color:var(--txt-dim)}
+  .card a.more{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--acc);
+    border-bottom:1px solid rgba(94,234,212,.3);padding-bottom:1px;transition:.2s}
+  .card a.more:hover{border-color:var(--acc);transform:translateX(3px)}
   .tag{display:inline-block;font-size:11.5px;color:var(--txt-mute);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin:12px 6px 0 0}
   /* ---- stack ---- */
   .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
@@ -183,9 +186,16 @@
     <div class="rv">
       <span class="eyebrow">Proyek</span>
       <h2>Yang sedang berjalan</h2>
-      <p class="lead">Empat hal yang sudah aktif, dari perangkat keras sampai antarmuka.</p>
+      <p class="lead">Lima hal yang sudah aktif, dari perangkat keras sampai antarmuka.</p>
     </div>
     <div class="grid">
+      <article class="card rv">
+        <div class="ico">🏢</div>
+        <h3>Kantor Virtual Agen 3D</h3>
+        <p>Ruang kerja tiga dimensi berisi kru agen: Luna, Mona, dan kolektor berita yang belum aktif. Kamera bisa diputar, siang-malam bisa diganti, dan tiap agen bisa diklik untuk melihat detailnya.</p>
+        <span class="tag">three.js</span><span class="tag">WebGL</span><span class="tag">Interaktif</span>
+        <a class="more" href="ruang/">Masuk ke kantor 3D →</a>
+      </article>
       <article class="card rv">
         <div class="ico">🛰️</div>
         <h3>Luna — Asisten Telegram</h3>
