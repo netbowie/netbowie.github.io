@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bowie — Agen AI Pribadi</title>
+<meta name="description" content="Bowie membangun tumpukan agen AI pribadi: Hermes di desktop, model lokal lewat Ollama, dan asisten Telegram bernama Luna.">
+<meta name="theme-color" content="#0a0e14">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080b11;
+    --bg-2:#0d1220;
+    --panel:rgba(20,26,40,.62);
+    --line:rgba(120,150,190,.16);
+    --line-2:rgba(120,150,190,.28);
+    --txt:#e8edf6;
+    --txt-dim:#9aa8bf;
+    --txt-mute:#6b7a93;
+    --acc:#5eead4;
+    --acc-2:#8b8cf8;
+    --glow:rgba(94,234,212,.16);
+    --radius:18px;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--txt);
+    font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* ---- ambient background ---- */
+  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:
+      radial-gradient(120% 90% at 12% -10%, #14243a 0%, transparent 55%),
+      radial-gradient(100% 80% at 92% 0%, #241a3c 0%, transparent 52%),
+      linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 60%,#070a10 100%);}
+  .bg::after{content:"";position:absolute;inset:0;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:56px 56px;opacity:.35;
+    mask-image:radial-gradient(75% 60% at 50% 20%,#000 0%,transparent 80%);
+    -webkit-mask-image:radial-gradient(75% 60% at 50% 20%,#000 0%,transparent 80%);}
+  .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5}
+  .orb.a{width:380px;height:380px;background:#0f766e;top:-90px;left:-80px}
+  .orb.b{width:420px;height:420px;background:#4338ca;top:160px;right:-120px;opacity:.38}
+  .wrap{width:min(1080px,92vw);margin:0 auto}
+  /* ---- nav ---- */
+  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);
+    background:linear-gradient(180deg,rgba(8,11,17,.86),rgba(8,11,17,.42));border-bottom:1px solid var(--line)}
+  nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.2px;text-decoration:none;color:var(--txt)}
+  .dot{width:11px;height:11px;border-radius:50%;background:var(--acc);box-shadow:0 0 14px var(--acc),0 0 30px var(--glow);animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.86)}}
+  .brand span small{display:block;font-size:11px;font-weight:400;color:var(--txt-mute);letter-spacing:.6px;text-transform:uppercase}
+  .navlinks{display:flex;gap:6px}
+  .navlinks a{color:var(--txt-dim);text-decoration:none;font-size:14.5px;padding:8px 13px;border-radius:10px;transition:.18s}
+  .navlinks a:hover{color:var(--txt);background:rgba(255,255,255,.055)}
+  @media(max-width:720px){.navlinks{display:none}}
+  /* ---- sections ---- */
+  section{padding:76px 0}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--acc);border:1px solid var(--line-2);background:rgba(94,234,212,.07);padding:6px 13px;border-radius:999px;margin-bottom:20px}
+  h2{font-size:clamp(24px,3.4vw,34px);line-height:1.25;letter-spacing:-.5px;margin-bottom:10px;font-weight:660}
+  .lead{color:var(--txt-dim);max-width:62ch}
+  /* ---- hero ---- */
+  .hero{padding:88px 0 60px;display:grid;grid-template-columns:1.15fr .85fr;gap:52px;align-items:center}
+  @media(max-width:900px){.hero{grid-template-columns:1fr;gap:36px;padding-top:56px}}
+  h1{font-size:clamp(32px,5.6vw,56px);line-height:1.08;letter-spacing:-1.6px;font-weight:700;margin-bottom:20px}
+  .grad{background:linear-gradient(100deg,var(--acc) 0%,#a5f3fc 38%,var(--acc-2) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--txt-dim);font-size:17.5px;max-width:56ch;margin-bottom:30px}
+  .cta{display:flex;flex-wrap:wrap;gap:12px}
+  .btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-size:15px;font-weight:560;
+    padding:13px 22px;border-radius:12px;border:1px solid transparent;transition:.2s;cursor:pointer}
+  .btn.primary{background:linear-gradient(135deg,var(--acc),#22d3ee);color:#04231f;box-shadow:0 10px 34px -12px rgba(94,234,212,.6)}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(94,234,212,.75)}
+  .btn.ghost{border-color:var(--line-2);color:var(--txt);background:rgba(255,255,255,.03)}
+  .btn.ghost:hover{border-color:var(--acc);color:var(--acc)}
+  /* ---- machine card ---- */
+  .machine{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;
+    backdrop-filter:blur(10px);box-shadow:0 30px 70px -34px rgba(0,0,0,.9)}
+  .machine .row{display:flex;align-items:center;justify-content:space-between;padding:11px 2px;border-bottom:1px dashed var(--line)}
+  .machine .row:last-child{border-bottom:0}
+  .machine .k{font-size:13.5px;color:var(--txt-mute)}
+  .machine .v{font-size:14px;color:var(--txt);font-weight:520;font-variant-numeric:tabular-nums}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:999px;
+    border:1px solid var(--line-2);color:var(--acc);background:rgba(94,234,212,.07)}
+  .bar{height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:4px}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc-2))}
+  /* ---- stats ---- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
+  @media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .stat b{display:block;font-size:26px;letter-spacing:-.8px;font-weight:680;color:var(--txt)}
+  .stat span{font-size:12.5px;color:var(--txt-mute)}
+  /* ---- cards ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:16px;margin-top:32px}
+  .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;
+    transition:.22s;overflow:hidden}
+  .card::before{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(94,234,212,.09),transparent 60%);opacity:0;transition:.22s}
+  .card:hover{transform:translateY(-4px);border-color:var(--line-2)}
+  .card:hover::before{opacity:1}
+  .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;
+    background:rgba(94,234,212,.1);border:1px solid var(--line-2);margin-bottom:14px}
+  .card h3{font-size:17px;margin-bottom:7px;letter-spacing:-.2px;font-weight:620}
+  .card p{font-size:14.5px;color:var(--txt-dim)}
+  .card a.more{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--acc);
+    border-bottom:1px solid rgba(94,234,212,.3);padding-bottom:1px;transition:.2s}
+  .card a.more:hover{border-color:var(--acc);transform:translateX(3px)}
+  .tag{display:inline-block;font-size:11.5px;color:var(--txt-mute);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin:12px 6px 0 0}
+  /* ---- stack ---- */
+  .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .pill{font-size:13.5px;color:var(--txt-dim);background:rgba(255,255,255,.035);border:1px solid var(--line);
+    padding:8px 15px;border-radius:999px}
+  /* ---- contact ---- */
+  .contact{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:38px;
+    display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
+  @media(max-width:720px){.contact{padding:26px}}
+  .note{max-width:280px;background:rgba(94,234,212,.055);border:1px solid var(--line-2);border-radius:16px;padding:16px 18px}
+  .note b{display:block;color:var(--acc);font-size:13.5px;letter-spacing:.02em;margin-bottom:6px}
+  .note span{color:var(--txt-mute);font-size:13px;line-height:1.55}
+  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--txt-mute);font-size:13.5px;
+    display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
+  /* ---- reveal ---- */
+  .rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .rv.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb a"></div><div class="orb b"></div></div>
+
+<header>
+  <nav class="wrap">
+    <a class="brand" href="#beranda"><span class="dot"></span><span>Bowie<small>AI Agent Stack</small></span></a>
+    <div class="navlinks">
+      <a href="#tentang">Tentang</a>
+      <a href="#proyek">Proyek</a>
+      <a href="#tumpukan">Tumpukan</a>
+      <a href="#kontak">Kontak</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero wrap" id="beranda">
+    <div class="rv">
+      <span class="eyebrow">● Aktif 24/7 di rumah</span>
+      <h1>Halo, saya Bowie.<br>Saya membangun <span class="grad">tumpukan agen AI</span> milik sendiri.</h1>
+      <p>Hermes Agent berjalan di desktop, model bahasa lokal dilayani Ollama, dan Luna — asisten Telegram saya — mengurus pemantauan perangkat, laporan, dan riset harian. Semuanya di mesin sendiri, tanpa menyewa cloud.</p>
+      <div class="cta">
+        <a class="btn primary" href="#proyek">Lihat proyek →</a>
+        <a class="btn ghost" href="#kontak">Hubungi saya</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>64 GB</b><span>RAM dual-channel</span></div>
+        <div class="stat"><b>2</b><span>model lokal aktif</span></div>
+        <div class="stat"><b>1</b><span>asisten Telegram</span></div>
+        <div class="stat"><b>24/7</b><span>pemantauan daya</span></div>
+      </div>
+    </div>
+    <aside class="machine rv">
+      <div class="row"><span class="k">Stasiun kerja</span><span class="v">GEEKOM A9 Max</span></div>
+      <div class="row"><span class="k">Prosesor</span><span class="v">Ryzen AI 9 HX 470</span></div>
+      <div class="row"><span class="k">Grafis</span><span class="v">Radeon 890M iGPU</span></div>
+      <div class="row"><span class="k">Model lokal</span><span class="v">qwen3:8b · qwen3-4b</span></div>
+      <div class="row"><span class="k">Umpan daya</span><span class="v"><span class="chip">● BLUETTI AC180P</span></span></div>
+      <div style="padding-top:14px">
+        <div class="k" style="font-size:13px;color:var(--txt-mute)">Baterai cadangan</div>
+        <div class="bar"><i style="width:100%"></i></div>
+        <div style="font-size:12.5px;color:var(--txt-mute);margin-top:8px">100% · mode passthrough</div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="wrap" id="tentang">
+    <div class="rv">
+      <span class="eyebrow">Tentang</span>
+      <h2>Otomasi yang benar-benar saya pakai setiap hari.</h2>
+      <p class="lead">Saya bukan perusahaan — ini proyek pribadi. Saya menyusun agen AI yang membaca perangkat saya, menulis laporan, dan mengerjakan tugas berulang, supaya hal membosankan selesai tanpa saya sentuh. Semua data tinggal di komputer ini: model, log, dan riwayat percakapan.</p>
+      <p class="lead" style="margin-top:14px">Pendekatannya sederhana: satu agen utama sebagai manajer, beberapa agen pembantu untuk tugas paralel, dan berkas status sebagai ingatan antar-hari.</p>
+    </div>
+  </section>
+
+  <section class="wrap" id="proyek">
+    <div class="rv">
+      <span class="eyebrow">Proyek</span>
+      <h2>Yang sedang berjalan</h2>
+      <p class="lead">Lima hal yang sudah aktif, dari perangkat keras sampai antarmuka.</p>
+    </div>
+    <div class="grid">
+      <article class="card rv">
+        <div class="ico">🏢</div>
+        <h3>Kantor Virtual Agen 3D</h3>
+        <p>Ruang kerja tiga dimensi berisi kru agen: Luna, Mona, dan kolektor berita yang belum aktif. Kamera bisa diputar, siang-malam bisa diganti, dan tiap agen bisa diklik untuk melihat detailnya.</p>
+        <span class="tag">three.js</span><span class="tag">WebGL</span><span class="tag">Interaktif</span>
+        <a class="more" href="ruang/">Masuk ke kantor 3D →</a>
+      </article>
+      <article class="card rv">
+        <div class="ico">🛰️</div>
+        <h3>Luna — Asisten Telegram</h3>
+        <p>Bot Telegram yang menjawab pertanyaan, menjalankan tugas di PC, dan menyusun laporan terjadwal. Ditenagai Hermes Agent dengan model cepat untuk obrolan harian.</p>
+        <span class="tag">Hermes Agent</span><span class="tag">Telegram</span>
+      </article>
+      <article class="card rv">
+        <div class="ico">🌦️</div>
+        <h3>Dashboard Cuaca Indonesia</h3>
+        <p>Peta interaktif 28 kota dengan data Open-Meteo dan BMKG, tampilan gelap, dan pembaruan otomatis. Dibuat satu berkas HTML agar bisa dibuka di mana saja.</p>
+        <span class="tag">Leaflet</span><span class="tag">Open-Meteo</span>
+      </article>
+      <article class="card rv">
+        <div class="ico">🔋</div>
+        <h3>Pemantauan UPS</h3>
+        <p>Power station BLUETTI dibaca langsung lewat Bluetooth, lalu dicatat sebagai deret waktu untuk melihat pola konsumsi dan mendeteksi pemadaman listrik.</p>
+        <span class="tag">BLE</span><span class="tag">IoT terenkripsi</span>
+      </article>
+      <article class="card rv">
+        <div class="ico">🖥️</div>
+        <h3>Laporan Kondisi PC</h3>
+        <p>Ringkasan kesehatan mesin: suhu, RAM, kapasitas disk, dan kejadian mati mendadak — dirapikan jadi laporan HTML dan PDF siap dibaca.</p>
+        <span class="tag">Python</span><span class="tag">Otomatis</span>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap" id="tumpukan">
+    <div class="rv">
+      <span class="eyebrow">Tumpukan</span>
+      <h2>Alat yang saya pakai</h2>
+      <p class="lead">Sederhana, lokal, dan bisa saya bongkar sendiri kapan saja.</p>
+      <div class="pills">
+        <span class="pill">Hermes Agent</span>
+        <span class="pill">Ollama</span>
+        <span class="pill">qwen3:8b</span>
+        <span class="pill">Python</span>
+        <span class="pill">Node.js</span>
+        <span class="pill">Windows 11</span>
+        <span class="pill">Bluetooth LE</span>
+        <span class="pill">Cloudflare Pages</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="kontak">
+    <div class="contact rv">
+      <div>
+        <h2 style="margin-bottom:8px">Ingin bertukar pikiran?</h2>
+        <p class="lead" style="font-size:15.5px">Saya terbuka untuk diskusi soal agen AI lokal, otomasi rumah, atau sekadar bertanya bagaimana Luna dibangun.</p>
+      </div>
+      <div class="note">
+        <b>Kontak pribadi</b>
+        <span>Tidak ada tautan obrolan di halaman ini. Saya hanya dapat dihubungi lewat kanal pribadi yang sudah dikenal.</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>© <span id="yr">2026</span> Bowie — dibangun sendiri di rumah.</span>
+  <span>Situs statis · tanpa pelacak · tanpa cookie</span>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  var els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(function (e) { e.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    els.forEach(function (e) { io.observe(e); });
+  }
+  window.__errs = [];
+  window.addEventListener('error', function (e) { window.__errs.push(String(e.message)); });
+</script>
+</body>
+</html>

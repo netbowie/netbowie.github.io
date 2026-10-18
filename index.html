@@ -1,280 +1,492 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bowie — Agen AI Pribadi</title>
-<meta name="description" content="Bowie membangun tumpukan agen AI pribadi: Hermes di desktop, model lokal lewat Ollama, dan asisten Telegram bernama Luna.">
-<meta name="theme-color" content="#0a0e14">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LUNA 26 · Overview</title>
+<meta name="description" content="Dashboard pemantauan tumpukan agen AI lokal Bowie: suhu CPU, RAM, disk, daya BLUETTI, tugas terjadwal, jaringan, dan pemutar musik. Data contoh.">
+<link rel="canonical" href="https://netbowie.github.io/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2.5 27.7 9.25v13.5L16 29.5 4.3 22.75V9.25Z' fill='%230a0c10' stroke='%237ee787' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='3.4' fill='%237ee787'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0a0c10">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LUNA 26">
+<meta property="og:title" content="LUNA 26 — Overview">
+<meta property="og:description" content="Dashboard pemantauan tumpukan agen AI lokal: CPU, RAM, disk, daya, tugas terjadwal, jaringan.">
+<meta property="og:url" content="https://netbowie.github.io/">
+<meta property="og:image" content="https://netbowie.github.io/og.png">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="1000">
+<meta name="twitter:card" content="summary_large_image">
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
-    --bg:#080b11;
-    --bg-2:#0d1220;
-    --panel:rgba(20,26,40,.62);
-    --line:rgba(120,150,190,.16);
-    --line-2:rgba(120,150,190,.28);
-    --txt:#e8edf6;
-    --txt-dim:#9aa8bf;
-    --txt-mute:#6b7a93;
-    --acc:#5eead4;
-    --acc-2:#8b8cf8;
-    --glow:rgba(94,234,212,.16);
-    --radius:18px;
+    --bg:#0a0c10; --card:#11151b; --border:#202833;
+    --green:#7ee787; --amber:#f2b880; --red:#ff7b72; --blue:#58a6ff;
+    --text:#e8edf3; --muted:#7d8898;
+    --radius:12px;
   }
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg);
-    color:var(--txt);
-    font:16px/1.65 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#07090c;color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:13px;line-height:1.4;
+    -webkit-font-smoothing:antialiased}
+  .num,.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;font-variant-numeric:tabular-nums}
+  .app{width:1600px;height:1000px;position:absolute;top:0;left:0;transform-origin:top left;background:var(--bg)}
+  .main{width:1600px;height:1000px;padding:0 32px 26px;display:grid;grid-template-rows:60px 38px 122px 300px 316px 58px;gap:16px;min-width:0}
+
+  /* Top bar (no sidebar) */
+  .topnav{display:flex;align-items:center;gap:18px;margin:0 -32px;padding:0 32px;height:60px;border-bottom:1px solid var(--border);background:#0c0f14}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand b{font-size:15px;letter-spacing:.14em;font-weight:650;white-space:nowrap}
+  .tabs{display:flex;align-items:center;gap:2px;margin-left:14px}
+  .tabs a,.tabs span{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:13px;white-space:nowrap}
+  .tabs a svg,.tabs span svg{width:16px;height:16px;flex:none}
+  .tabs a.active,.tabs span.active{background:#161c24;color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 0 0 1px var(--border)}
+  .tabs a.active svg,.tabs span.active svg{color:var(--green)}
+  .topnav .search{width:246px}
+  .ghost{display:flex;align-items:center;gap:7px;height:34px;padding:0 13px;white-space:nowrap;border-radius:9px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:12.5px;background:#161c24}
+  .ghost svg{width:13px;height:13px;color:var(--muted)}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:20px;padding:0 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+  .pulse{position:relative;width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+  .pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--green);animation:pulse 2s ease-out infinite}
+  @keyframes pulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.8);opacity:0}}
+  .live{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;white-space:nowrap}
+
+  /* Page head */
+  .pagehead{display:flex;align-items:center;gap:14px}
+  .pagehead h1{font-size:24px;font-weight:620;letter-spacing:-.015em}
+  .pagehead .sub{color:var(--muted);font-size:13px;padding-top:5px}
+  .spacer{flex:1}
+  .search{display:flex;align-items:center;gap:9px;white-space:nowrap;overflow:hidden;width:300px;height:38px;padding:0 14px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:13px}
+  .search kbd{margin-left:auto;font-family:inherit;font-size:11px;padding:1px 6px;border:1px solid var(--border);border-radius:5px}
+  .iconbtn{position:relative;width:38px;height:38px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:grid;place-items:center;color:var(--muted)}
+  .badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--amber);color:#1a1206;font-size:10.5px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)}
+  .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2a3a4d,#1b2430);border:1px solid var(--border);display:grid;place-items:center;font-size:13px;font-weight:600;color:#c9d4e0}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:inset 0 1px 0 rgba(255,255,255,.035);padding:20px 22px;min-width:0;min-height:0}
+  .card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .card-h h2{font-size:14px;font-weight:600}
+  .card-h .meta{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:14px}
+  .legend{display:inline-flex;align-items:center;gap:6px}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(7,1fr);gap:14px}
+  .kpi{padding:16px 16px 14px;display:flex;flex-direction:column}
+  .kpi .label{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .kpi .value{margin-top:6px;font-size:27px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+  .kpi .value small{font-size:13px;color:var(--muted);font-weight:500;margin-left:4px;letter-spacing:0}
+  .kpi .subl{color:var(--muted);font-size:11.5px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi svg{margin-top:auto;width:100%;height:22px;display:block}
+  .warn-t{color:var(--amber)}
+
+  .row{display:grid;grid-template-columns:2fr 1fr;gap:20px;min-height:0}
+
+  /* Chart */
+  .chart{width:100%;height:206px;display:block}
+  .chart text{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;fill:var(--muted)}
+
+  /* Power */
+  .bat{display:flex;align-items:baseline;justify-content:space-between}
+  .bat .big{font-size:30px;font-weight:600;letter-spacing:-.02em}
+  .bar{height:6px;border-radius:3px;background:#1a212b;margin:10px 0 14px;overflow:hidden}
+  .bar i{display:block;height:100%;width:100%;background:var(--green);border-radius:3px}
+  .kv{display:flex;justify-content:space-between;align-items:center;height:34px;border-top:1px solid #1a212b;font-size:13px}
+  .kv span:first-child{color:var(--muted)}
+  .status{margin-top:12px;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;background:rgba(126,231,135,.07);border:1px solid rgba(126,231,135,.18);color:var(--green);font-size:12.5px;font-weight:600;letter-spacing:.06em}
+  .status .r{margin-left:auto;color:var(--muted);font-weight:400;letter-spacing:0}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--muted);font-weight:500;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;padding:0 10px 12px;border-bottom:1px solid var(--border)}
+  td{padding:0 10px;height:41px;border-bottom:1px solid #1a212b}
+  tr:last-child td{border-bottom:none}
+  td:first-child,th:first-child{padding-left:0}
+  td:last-child,th:last-child{text-align:right;padding-right:0}
+  .job{display:flex;align-items:center;gap:10px;font-weight:500}
+  .job svg{color:var(--muted)}
+  .muted{color:var(--muted)}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:650;letter-spacing:.06em}
+  .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .ok{color:var(--green);background:rgba(126,231,135,.09)}
+  .warn{color:var(--amber);background:rgba(242,184,128,.1)}
+  .fail{color:var(--red);background:rgba(255,123,114,.1)}
+
+  /* Network */
+  .wan{display:grid;grid-template-columns:1fr auto;row-gap:3px;padding:10px 0;border-bottom:1px solid #1a212b}
+  .wan:first-of-type{padding-top:2px}
+  .wan .name{display:flex;align-items:center;gap:8px;font-weight:600}
+  .wan .name em{font-style:normal;font-weight:400;color:var(--muted);font-size:12px}
+  .wan .ip{color:var(--muted);font-size:12px}
+  .wan .stats{display:flex;gap:18px;justify-content:flex-end;font-size:13px}
+  .wan .stats span b{font-weight:500}
+  .wan .stats small{color:var(--muted);font-size:11px;margin-left:3px}
+  .net-spark{margin-top:12px}
+  .net-spark .cap{display:flex;justify-content:space-between;color:var(--muted);font-size:11.5px;margin-bottom:6px}
+  .net-spark svg{width:100%;height:38px;display:block}
+  .data-today{margin-top:10px;display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #1a212b}
+  .data-today span:first-child{color:var(--muted)}
+  .data-today b{font-size:16px;font-weight:600}
+
+  /* YouTube player bar */
+  .player{display:flex;align-items:center;gap:18px;padding:10px 20px}
+  .yt-thumb{width:58px;height:38px;border-radius:8px;flex:none;display:grid;place-items:center;background:linear-gradient(135deg,#232b36,#141a22);border:1px solid var(--border)}
+  .yt-thumb svg{width:22px;height:22px}
+  .yt-meta{width:246px;flex:none;min-width:0}
+  .yt-meta b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .yt-meta span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .eq{display:flex;align-items:flex-end;gap:2.5px;height:16px;flex:none}
+  .eq i{display:block;width:3px;height:6px;border-radius:1px;background:var(--green);animation:eq 1.1s ease-in-out infinite}
+  .eq i:nth-child(2){animation-delay:.18s}
+  .eq i:nth-child(3){animation-delay:.36s}
+  .eq i:nth-child(4){animation-delay:.12s}
+  @keyframes eq{0%,100%{height:5px;opacity:.65}50%{height:16px;opacity:1}}
+  .pctl{display:flex;align-items:center;gap:10px;flex:none}
+  .pctl button{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:#161c24;color:var(--text);display:grid;place-items:center;cursor:default}
+  .pctl .play{width:34px;height:34px;background:var(--green);color:#0a1a10;border:0}
+  .pctl svg{width:14px;height:14px}
+  .pctl .play svg{width:15px;height:15px}
+  .prog{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+  .prog .num{color:var(--muted);font-size:11.5px;flex:none}
+  .prog .bar{position:relative;flex:1;height:4px;border-radius:2px;background:#1b2430;min-width:60px}
+  .prog .bar i{position:absolute;top:0;bottom:0;left:0;right:64%;background:var(--green);border-radius:2px}
+  .prog .bar i::after{content:"";position:absolute;right:-4px;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(126,231,135,.16)}
+  .vol{display:flex;align-items:center;gap:9px;color:var(--muted);flex:none}
+  .vol svg{width:16px;height:16px}
+  .vol .bar{position:relative;width:62px;height:4px;border-radius:2px;background:#1b2430}
+  .vol .bar i{position:absolute;top:0;bottom:0;left:0;right:32%;background:#5c6a7a;border-radius:2px}
+  .yt-queue{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11.5px;flex:none}
+  .yt-queue svg{width:15px;height:15px}
+
+  /* ---- portrait / small screens: reflow instead of shrinking ---- */
+  @media (max-width: 860px) {
+    html,body{overflow:auto;height:auto}
+    .app{position:static!important;transform:none!important;width:100%;height:auto}
+    .main{width:100%;height:auto;grid-template-rows:none;gap:14px;padding:0 14px 18px}
+    .topnav{margin:0;padding:0 14px;gap:10px}
+    .tabs,.search{display:none}
+    .pagehead{flex-wrap:wrap;gap:8px}
+    .pagehead h1{font-size:20px}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    section.row,.row{grid-template-columns:1fr!important}
+    .chart{height:170px}
+    .card{overflow-x:auto}
+    .player{flex-wrap:wrap;gap:12px;padding:12px 14px}
+    .brand b{font-size:14px}
+    .ghost{height:30px;padding:0 10px;font-size:12px}
+    .topnav{gap:8px}
+    .kpi .subl{white-space:normal;line-height:1.35}
+    .card-h{flex-wrap:wrap;gap:6px}
+    .card-h .meta{gap:8px;font-size:11.5px}
+    .yt-meta{width:auto;flex:1 1 150px}
+    .prog{order:6;flex:1 1 100%}
+    .yt-queue{display:none}
+    table{font-size:12px}
+    td{height:38px}
   }
-  /* ---- ambient background ---- */
-  .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:
-      radial-gradient(120% 90% at 12% -10%, #14243a 0%, transparent 55%),
-      radial-gradient(100% 80% at 92% 0%, #241a3c 0%, transparent 52%),
-      linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 60%,#070a10 100%);}
-  .bg::after{content:"";position:absolute;inset:0;
-    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-    background-size:56px 56px;opacity:.35;
-    mask-image:radial-gradient(75% 60% at 50% 20%,#000 0%,transparent 80%);
-    -webkit-mask-image:radial-gradient(75% 60% at 50% 20%,#000 0%,transparent 80%);}
-  .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5}
-  .orb.a{width:380px;height:380px;background:#0f766e;top:-90px;left:-80px}
-  .orb.b{width:420px;height:420px;background:#4338ca;top:160px;right:-120px;opacity:.38}
-  .wrap{width:min(1080px,92vw);margin:0 auto}
-  /* ---- nav ---- */
-  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);
-    background:linear-gradient(180deg,rgba(8,11,17,.86),rgba(8,11,17,.42));border-bottom:1px solid var(--line)}
-  nav{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.2px;text-decoration:none;color:var(--txt)}
-  .dot{width:11px;height:11px;border-radius:50%;background:var(--acc);box-shadow:0 0 14px var(--acc),0 0 30px var(--glow);animation:pulse 2.6s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.86)}}
-  .brand span small{display:block;font-size:11px;font-weight:400;color:var(--txt-mute);letter-spacing:.6px;text-transform:uppercase}
-  .navlinks{display:flex;gap:6px}
-  .navlinks a{color:var(--txt-dim);text-decoration:none;font-size:14.5px;padding:8px 13px;border-radius:10px;transition:.18s}
-  .navlinks a:hover{color:var(--txt);background:rgba(255,255,255,.055)}
-  @media(max-width:720px){.navlinks{display:none}}
-  /* ---- sections ---- */
-  section{padding:76px 0}
-  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:1.4px;text-transform:uppercase;
-    color:var(--acc);border:1px solid var(--line-2);background:rgba(94,234,212,.07);padding:6px 13px;border-radius:999px;margin-bottom:20px}
-  h2{font-size:clamp(24px,3.4vw,34px);line-height:1.25;letter-spacing:-.5px;margin-bottom:10px;font-weight:660}
-  .lead{color:var(--txt-dim);max-width:62ch}
-  /* ---- hero ---- */
-  .hero{padding:88px 0 60px;display:grid;grid-template-columns:1.15fr .85fr;gap:52px;align-items:center}
-  @media(max-width:900px){.hero{grid-template-columns:1fr;gap:36px;padding-top:56px}}
-  h1{font-size:clamp(32px,5.6vw,56px);line-height:1.08;letter-spacing:-1.6px;font-weight:700;margin-bottom:20px}
-  .grad{background:linear-gradient(100deg,var(--acc) 0%,#a5f3fc 38%,var(--acc-2) 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p{color:var(--txt-dim);font-size:17.5px;max-width:56ch;margin-bottom:30px}
-  .cta{display:flex;flex-wrap:wrap;gap:12px}
-  .btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-size:15px;font-weight:560;
-    padding:13px 22px;border-radius:12px;border:1px solid transparent;transition:.2s;cursor:pointer}
-  .btn.primary{background:linear-gradient(135deg,var(--acc),#22d3ee);color:#04231f;box-shadow:0 10px 34px -12px rgba(94,234,212,.6)}
-  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(94,234,212,.75)}
-  .btn.ghost{border-color:var(--line-2);color:var(--txt);background:rgba(255,255,255,.03)}
-  .btn.ghost:hover{border-color:var(--acc);color:var(--acc)}
-  /* ---- machine card ---- */
-  .machine{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;
-    backdrop-filter:blur(10px);box-shadow:0 30px 70px -34px rgba(0,0,0,.9)}
-  .machine .row{display:flex;align-items:center;justify-content:space-between;padding:11px 2px;border-bottom:1px dashed var(--line)}
-  .machine .row:last-child{border-bottom:0}
-  .machine .k{font-size:13.5px;color:var(--txt-mute)}
-  .machine .v{font-size:14px;color:var(--txt);font-weight:520;font-variant-numeric:tabular-nums}
-  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:999px;
-    border:1px solid var(--line-2);color:var(--acc);background:rgba(94,234,212,.07)}
-  .bar{height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:4px}
-  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc-2))}
-  /* ---- stats ---- */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
-  @media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-  .stat b{display:block;font-size:26px;letter-spacing:-.8px;font-weight:680;color:var(--txt)}
-  .stat span{font-size:12.5px;color:var(--txt-mute)}
-  /* ---- cards ---- */
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:16px;margin-top:32px}
-  .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;
-    transition:.22s;overflow:hidden}
-  .card::before{content:"";position:absolute;inset:0;background:linear-gradient(150deg,rgba(94,234,212,.09),transparent 60%);opacity:0;transition:.22s}
-  .card:hover{transform:translateY(-4px);border-color:var(--line-2)}
-  .card:hover::before{opacity:1}
-  .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;
-    background:rgba(94,234,212,.1);border:1px solid var(--line-2);margin-bottom:14px}
-  .card h3{font-size:17px;margin-bottom:7px;letter-spacing:-.2px;font-weight:620}
-  .card p{font-size:14.5px;color:var(--txt-dim)}
-  .card a.more{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--acc);
-    border-bottom:1px solid rgba(94,234,212,.3);padding-bottom:1px;transition:.2s}
-  .card a.more:hover{border-color:var(--acc);transform:translateX(3px)}
-  .tag{display:inline-block;font-size:11.5px;color:var(--txt-mute);border:1px solid var(--line);border-radius:999px;padding:3px 9px;margin:12px 6px 0 0}
-  /* ---- stack ---- */
-  .pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
-  .pill{font-size:13.5px;color:var(--txt-dim);background:rgba(255,255,255,.035);border:1px solid var(--line);
-    padding:8px 15px;border-radius:999px}
-  /* ---- contact ---- */
-  .contact{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:38px;
-    display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
-  @media(max-width:720px){.contact{padding:26px}}
-  .note{max-width:280px;background:rgba(94,234,212,.055);border:1px solid var(--line-2);border-radius:16px;padding:16px 18px}
-  .note b{display:block;color:var(--acc);font-size:13.5px;letter-spacing:.02em;margin-bottom:6px}
-  .note span{color:var(--txt-mute);font-size:13px;line-height:1.55}
-  footer{border-top:1px solid var(--line);padding:26px 0;color:var(--txt-mute);font-size:13.5px;
-    display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
-  /* ---- reveal ---- */
-  .rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
-  .rv.in{opacity:1;transform:none}
-  @media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
-<div class="bg"><div class="orb a"></div><div class="orb b"></div></div>
+<div class="app">
+  <main class="main">
 
-<header>
-  <nav class="wrap">
-    <a class="brand" href="#beranda"><span class="dot"></span><span>Bowie<small>AI Agent Stack</small></span></a>
-    <div class="navlinks">
-      <a href="#tentang">Tentang</a>
-      <a href="#proyek">Proyek</a>
-      <a href="#tumpukan">Tumpukan</a>
-      <a href="#kontak">Kontak</a>
-    </div>
-  </nav>
-</header>
-
-<main>
-  <section class="hero wrap" id="beranda">
-    <div class="rv">
-      <span class="eyebrow">● Aktif 24/7 di rumah</span>
-      <h1>Halo, saya Bowie.<br>Saya membangun <span class="grad">tumpukan agen AI</span> milik sendiri.</h1>
-      <p>Hermes Agent berjalan di desktop, model bahasa lokal dilayani Ollama, dan Luna — asisten Telegram saya — mengurus pemantauan perangkat, laporan, dan riset harian. Semuanya di mesin sendiri, tanpa menyewa cloud.</p>
-      <div class="cta">
-        <a class="btn primary" href="#proyek">Lihat proyek →</a>
-        <a class="btn ghost" href="#kontak">Hubungi saya</a>
+    <!-- Top bar -->
+    <header class="topnav">
+      <div class="brand">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M16 2.5 27.7 9.25v13.5L16 29.5 4.3 22.75V9.25Z" stroke="#7ee787" stroke-width="1.8" stroke-linejoin="round" fill="rgba(126,231,135,.08)"/>
+        <circle cx="16" cy="16" r="3.4" fill="#7ee787"/>
+        <path d="M16 12.6V7M18.9 17.7l4.8 2.8M13.1 17.7l-4.8 2.8" stroke="#7ee787" stroke-width="1.5" stroke-linecap="round" opacity=".7"/>
+      </svg>
+        <b>LUNA 26</b>
       </div>
-      <div class="stats">
-        <div class="stat"><b>64 GB</b><span>RAM dual-channel</span></div>
-        <div class="stat"><b>2</b><span>model lokal aktif</span></div>
-        <div class="stat"><b>1</b><span>asisten Telegram</span></div>
-        <div class="stat"><b>24/7</b><span>pemantauan daya</span></div>
+      <nav class="tabs">
+        <span class="active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>Overview</span>
+        <span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="5" width="10" height="10" rx="1.5"/><rect x="8" y="8" width="4" height="4"/><path d="M8 2v3M12 2v3M8 15v3M12 15v3M2 8h3M2 12h3M15 8h3M15 12h3" stroke-linecap="round"/></svg>Machine</span>
+        <span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="12" height="10" rx="3"/><path d="M10 6V3M10 3h0" stroke-linecap="round"/><circle cx="10" cy="2.6" r="1" fill="currentColor" stroke="none"/><circle cx="7.6" cy="11" r="1.1" fill="currentColor" stroke="none"/><circle cx="12.4" cy="11" r="1.1" fill="currentColor" stroke="none"/></svg>Agents</span>
+        <span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M11 2 4.5 11H10l-1 7 6.5-9H10z"/></svg>Power</span>
+        <span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M2.5 10h15M10 2.5c2.2 2.3 3 4.8 3 7.5s-.8 5.2-3 7.5c-2.2-2.3-3-4.8-3-7.5s.8-5.2 3-7.5Z"/></svg>Network</span>
+        <span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 2.5h7l3.5 3.5v11.5h-10.5z" stroke-linejoin="round"/><path d="M8 9h5M8 12h5M8 15h3"/></svg>Logs</span>
+      </nav>
+      <div class="spacer"></div>
+      <a class="ghost" href="/ruang/">Kantor 3D <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 13 7M8 7h5v5"/></svg></a>
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="m13.5 13.5 4 4"/></svg>
+        Search agents, jobs…<kbd>Ctrl K</kbd>
       </div>
-    </div>
-    <aside class="machine rv">
-      <div class="row"><span class="k">Stasiun kerja</span><span class="v">GEEKOM A9 Max</span></div>
-      <div class="row"><span class="k">Prosesor</span><span class="v">Ryzen AI 9 HX 470</span></div>
-      <div class="row"><span class="k">Grafis</span><span class="v">Radeon 890M iGPU</span></div>
-      <div class="row"><span class="k">Model lokal</span><span class="v">qwen3:8b · qwen3-4b</span></div>
-      <div class="row"><span class="k">Umpan daya</span><span class="v"><span class="chip">● BLUETTI AC180P</span></span></div>
-      <div style="padding-top:14px">
-        <div class="k" style="font-size:13px;color:var(--txt-mute)">Baterai cadangan</div>
-        <div class="bar"><i style="width:100%"></i></div>
-        <div style="font-size:12.5px;color:var(--txt-mute);margin-top:8px">100% · mode passthrough</div>
+      <div class="iconbtn">
+        <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8a5 5 0 0 1 10 0c0 4.5 2 6 2 6H3s2-1.5 2-6Z"/><path d="M8.3 17a1.9 1.9 0 0 0 3.4 0"/></svg>
+        <span class="badge num">2</span>
       </div>
-    </aside>
-  </section>
+      <div class="avatar">BB</div>
+    </header>
 
-  <section class="wrap" id="tentang">
-    <div class="rv">
-      <span class="eyebrow">Tentang</span>
-      <h2>Otomasi yang benar-benar saya pakai setiap hari.</h2>
-      <p class="lead">Saya bukan perusahaan — ini proyek pribadi. Saya menyusun agen AI yang membaca perangkat saya, menulis laporan, dan mengerjakan tugas berulang, supaya hal membosankan selesai tanpa saya sentuh. Semua data tinggal di komputer ini: model, log, dan riwayat percakapan.</p>
-      <p class="lead" style="margin-top:14px">Pendekatannya sederhana: satu agen utama sebagai manajer, beberapa agen pembantu untuk tugas paralel, dan berkas status sebagai ingatan antar-hari.</p>
+    <!-- Page head -->
+    <div class="pagehead">
+      <h1>Overview</h1>
+      <div class="sub">Local stack · bowie-desktop</div>
+      <span class="chip">sample data</span>
+      <div class="spacer"></div>
+      <div class="live"><span class="pulse"></span>last update 4s ago</div>
     </div>
-  </section>
 
-  <section class="wrap" id="proyek">
-    <div class="rv">
-      <span class="eyebrow">Proyek</span>
-      <h2>Yang sedang berjalan</h2>
-      <p class="lead">Lima hal yang sudah aktif, dari perangkat keras sampai antarmuka.</p>
-    </div>
-    <div class="grid">
-      <article class="card rv">
-        <div class="ico">🏢</div>
-        <h3>Kantor Virtual Agen 3D</h3>
-        <p>Ruang kerja tiga dimensi berisi kru agen: Luna, Mona, dan kolektor berita yang belum aktif. Kamera bisa diputar, siang-malam bisa diganti, dan tiap agen bisa diklik untuk melihat detailnya.</p>
-        <span class="tag">three.js</span><span class="tag">WebGL</span><span class="tag">Interaktif</span>
-        <a class="more" href="ruang/">Masuk ke kantor 3D →</a>
-      </article>
-      <article class="card rv">
-        <div class="ico">🛰️</div>
-        <h3>Luna — Asisten Telegram</h3>
-        <p>Bot Telegram yang menjawab pertanyaan, menjalankan tugas di PC, dan menyusun laporan terjadwal. Ditenagai Hermes Agent dengan model cepat untuk obrolan harian.</p>
-        <span class="tag">Hermes Agent</span><span class="tag">Telegram</span>
-      </article>
-      <article class="card rv">
-        <div class="ico">🌦️</div>
-        <h3>Dashboard Cuaca Indonesia</h3>
-        <p>Peta interaktif 28 kota dengan data Open-Meteo dan BMKG, tampilan gelap, dan pembaruan otomatis. Dibuat satu berkas HTML agar bisa dibuka di mana saja.</p>
-        <span class="tag">Leaflet</span><span class="tag">Open-Meteo</span>
-      </article>
-      <article class="card rv">
-        <div class="ico">🔋</div>
-        <h3>Pemantauan UPS</h3>
-        <p>Power station BLUETTI dibaca langsung lewat Bluetooth, lalu dicatat sebagai deret waktu untuk melihat pola konsumsi dan mendeteksi pemadaman listrik.</p>
-        <span class="tag">BLE</span><span class="tag">IoT terenkripsi</span>
-      </article>
-      <article class="card rv">
-        <div class="ico">🖥️</div>
-        <h3>Laporan Kondisi PC</h3>
-        <p>Ringkasan kesehatan mesin: suhu, RAM, kapasitas disk, dan kejadian mati mendadak — dirapikan jadi laporan HTML dan PDF siap dibaca.</p>
-        <span class="tag">Python</span><span class="tag">Otomatis</span>
-      </article>
-    </div>
-  </section>
-
-  <section class="wrap" id="tumpukan">
-    <div class="rv">
-      <span class="eyebrow">Tumpukan</span>
-      <h2>Alat yang saya pakai</h2>
-      <p class="lead">Sederhana, lokal, dan bisa saya bongkar sendiri kapan saja.</p>
-      <div class="pills">
-        <span class="pill">Hermes Agent</span>
-        <span class="pill">Ollama</span>
-        <span class="pill">qwen3:8b</span>
-        <span class="pill">Python</span>
-        <span class="pill">Node.js</span>
-        <span class="pill">Windows 11</span>
-        <span class="pill">Bluetooth LE</span>
-        <span class="pill">Cloudflare Pages</span>
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="card kpi">
+        <div class="label">CPU temp <span class="dot" style="background:var(--green)"></span></div>
+        <div class="value num">58<small>°C</small></div>
+        <div class="subl">limit 85 · normal</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,15 10,14 20,16 30,13 40,12 50,14 60,9 70,11 80,8 90,10 100,9 110,11 120,10" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
       </div>
-    </div>
-  </section>
-
-  <section class="wrap" id="kontak">
-    <div class="contact rv">
-      <div>
-        <h2 style="margin-bottom:8px">Ingin bertukar pikiran?</h2>
-        <p class="lead" style="font-size:15.5px">Saya terbuka untuk diskusi soal agen AI lokal, otomasi rumah, atau sekadar bertanya bagaimana Luna dibangun.</p>
+      <div class="card kpi">
+        <div class="label">RAM <span class="dot" style="background:var(--green)"></span></div>
+        <div class="value num">41.2<small>/ 64 GB</small></div>
+        <div class="subl">64% · normal</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,14 10,14 20,13 30,13 40,11 50,11 60,10 70,9 80,9 90,8 100,7 110,8 120,7" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
       </div>
-      <div class="note">
-        <b>Kontak pribadi</b>
-        <span>Tidak ada tautan obrolan di halaman ini. Saya hanya dapat dihubungi lewat kanal pribadi yang sudah dikenal.</span>
+      <div class="card kpi">
+        <div class="label">Disk free <span class="dot" style="background:var(--green)"></span></div>
+        <div class="value num">212<small>GB</small></div>
+        <div class="subl">C: drive · normal</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,6 20,6 30,7 50,7 60,8 80,9 90,9 100,10 120,11" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
       </div>
-    </div>
-  </section>
-</main>
+      <div class="card kpi">
+        <div class="label">Battery <span class="dot" style="background:var(--green)"></span></div>
+        <div class="value num">100<small>%</small></div>
+        <div class="subl">passthrough · BLUETTI AC180P</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,12 10,10 20,8 30,6 40,4 50,3 120,3" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="card kpi">
+        <div class="label">Agents <span class="dot" style="background:var(--amber)"></span></div>
+        <div class="value num">11<small>/ 12</small></div>
+        <div class="subl warn-t">1 failed job · warning</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,5 60,5 70,5 80,5 90,5 95,14 120,14" fill="none" stroke="#f2b880" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="card kpi">
+        <div class="label">Models loaded <span class="dot" style="background:var(--green)"></span></div>
+        <div class="value num">2</div>
+        <div class="subl mono">qwen3:8b · qwen3-4b</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,16 25,16 30,10 55,10 60,4 85,4 90,10 100,10 105,10 110,10 120,10" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="card kpi">
+        <div class="label">Uptime <span class="dot" style="background:var(--green)"></span></div>
+        <div class="value num">6d 14h</div>
+        <div class="subl mono">since 12 Oct · 1 restart</div>
+        <svg viewBox="0 0 116 22" preserveAspectRatio="none"><rect x="0.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="8.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="17.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="25.5" y="15" width="6" height="7" rx="1.5" fill="#7ee787" opacity="0.45"/><rect x="34.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="42.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="51.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="59.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="68.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="76.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="85.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="93.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="102.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="110.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/></svg>
+      </div>
+    </section>
 
-<footer class="wrap">
-  <span>© <span id="yr">2026</span> Bowie — dibangun sendiri di rumah.</span>
-  <span>Situs statis · tanpa pelacak · tanpa cookie</span>
-</footer>
+    <!-- Middle row -->
+    <section class="row">
+      <div class="card">
+        <div class="card-h">
+          <h2>System load — last 24h</h2>
+          <div class="meta">
+            <span class="legend"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#7ee787" stroke-width="2"/></svg>CPU load %</span>
+            <span class="legend"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#58a6ff" stroke-width="2" stroke-dasharray="4 3"/></svg>RAM used %</span>
+          </div>
+        </div>
+        <svg class="chart" viewBox="0 0 820 214" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="cpuFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7ee787" stop-opacity=".22"/>
+              <stop offset="1" stop-color="#7ee787" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- gridlines -->
+          <g stroke="#1c232d" stroke-width="1">
+            <line x1="40" y1="10" x2="800" y2="10"/>
+            <line x1="40" y1="55" x2="800" y2="55"/>
+            <line x1="40" y1="100" x2="800" y2="100"/>
+            <line x1="40" y1="145" x2="800" y2="145"/>
+            <line x1="40" y1="190" x2="800" y2="190" stroke="#26303c"/>
+          </g>
+          <g text-anchor="end">
+            <text x="32" y="14">100%</text>
+            <text x="32" y="59">75%</text>
+            <text x="32" y="104">50%</text>
+            <text x="32" y="149">25%</text>
+            <text x="32" y="194">0%</text>
+          </g>
+          <g text-anchor="middle">
+            <text x="40" y="210" text-anchor="start">00:00</text>
+            <text x="230" y="210">06:00</text>
+            <text x="420" y="210">12:00</text>
+            <text x="610" y="210">18:00</text>
+            <text x="800" y="210" text-anchor="end">24:00</text>
+          </g>
+          <!-- CPU fill + line -->
+          <path d="M40 157.6 Q103.3 168.4 135 170.2 Q166.7 172 198.3 146.8 Q230 121.6 261.7 132.4 Q293.3 143.2 325 139.6 Q356.7 136 388.3 123.4 Q420 110.8 451.7 118 Q483.3 125.2 515 110.8 Q546.7 96.4 578.3 107.2 Q610 118 641.7 112.6 Q673.3 107.2 699.7 118 L726 128.8 L726 190 L40 190 Z" fill="url(#cpuFill)"/>
+          <path d="M40 157.6 Q103.3 168.4 135 170.2 Q166.7 172 198.3 146.8 Q230 121.6 261.7 132.4 Q293.3 143.2 325 139.6 Q356.7 136 388.3 123.4 Q420 110.8 451.7 118 Q483.3 125.2 515 110.8 Q546.7 96.4 578.3 107.2 Q610 118 641.7 112.6 Q673.3 107.2 699.7 118 L726 128.8" fill="none" stroke="#7ee787" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- RAM line -->
+          <path d="M40 96.4 Q103.3 98.2 135 98.2 Q166.7 98.2 198.3 91.9 Q230 85.6 261.7 86.5 Q293.3 87.4 325 85.6 Q356.7 83.8 388.3 81.1 Q420 78.4 451.7 79.3 Q483.3 80.2 515 76.6 Q546.7 73 578.3 74.8 Q610 76.6 641.7 73.9 Q673.3 71.2 699.7 73 L726 74.8" fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- now marker -->
+          <line x1="726" y1="22" x2="726" y2="190" stroke="#7d8898" stroke-width="1" stroke-dasharray="2 3" opacity=".7"/>
+          <rect x="702" y="2" width="48" height="17" rx="5" fill="#1a212b" stroke="#2a3441"/>
+          <text x="726" y="14.5" text-anchor="middle" style="fill:#e8edf3">now</text>
+          <circle cx="726" cy="128.8" r="4" fill="#11151b" stroke="#7ee787" stroke-width="2"/>
+          <circle cx="726" cy="74.8" r="4" fill="#11151b" stroke="#58a6ff" stroke-width="2"/>
+          <text x="736" y="132.5" style="fill:#7ee787">34%</text>
+          <text x="736" y="78.5" style="fill:#58a6ff">64%</text>
+        </svg>
+      </div>
 
+      <div class="card">
+        <div class="card-h">
+          <h2>Power — BLUETTI AC180P</h2>
+          <div class="meta mono">1152 Wh</div>
+        </div>
+        <div class="bat">
+          <span class="muted">Battery</span>
+          <span class="big num">100<small class="muted" style="font-size:14px;margin-left:3px">%</small></span>
+        </div>
+        <div class="bar"><i></i></div>
+        <div class="kv"><span>Input</span><span class="num">0 W</span></div>
+        <div class="kv"><span>Output</span><span class="num">96 W</span></div>
+        <div class="kv"><span>Runtime</span><span class="num">∞ (grid)</span></div>
+        <div class="status">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="#7ee787"><path d="M11.5 1 4 11.5h5.5L8 19l8-11h-5.5z"/></svg>
+          GRID ● ONLINE
+          <span class="r num">230 V · 50 Hz</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom row -->
+    <section class="row">
+      <div class="card">
+        <div class="card-h">
+          <h2>Scheduled jobs</h2>
+          <div class="meta"><span class="num">5 jobs · next: weather-sync in 18 min</span></div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Job</th><th>Schedule</th><th>Last run</th><th>Duration</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">morning-brief</span></div></td>
+              <td class="num muted">06:00 daily</td>
+              <td class="num">today 06:00:03</td>
+              <td class="num">41.8 s</td>
+              <td><span class="pill ok">OK</span></td>
+            </tr>
+            <tr>
+              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">weather-sync</span></div></td>
+              <td class="num muted">every 30 min</td>
+              <td class="num">today 21:30:00</td>
+              <td class="num">2.4 s</td>
+              <td><span class="pill ok">OK</span></td>
+            </tr>
+            <tr>
+              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">ups-log</span></div></td>
+              <td class="num muted">every 5 min</td>
+              <td class="num">today 21:40:00</td>
+              <td class="num">0.6 s</td>
+              <td><span class="pill ok">OK</span></td>
+            </tr>
+            <tr>
+              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">disk-report</span></div></td>
+              <td class="num muted">20:00 daily</td>
+              <td class="num">today 20:00:01</td>
+              <td class="num">11.2 s</td>
+              <td><span class="pill warn">WARN</span></td>
+            </tr>
+            <tr>
+              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">news-digest</span></div></td>
+              <td class="num muted">18:00 daily</td>
+              <td class="num">today 18:00:00</td>
+              <td class="num">120.0 s</td>
+              <td><span class="pill fail">FAILED</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <h2>Network</h2>
+          <div class="meta">dual WAN · failover</div>
+        </div>
+        <div class="wan">
+          <div class="name">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1.5 10.5 7H7.5v3.5h-3V7H1.5z" fill="#7ee787"/></svg>
+            WAN1 <em>fiber · primary</em>
+          </div>
+          <div class="stats num"><span><b>12</b><small>ms</small></span><span><b>0.0</b><small>% loss</small></span></div>
+          <div class="ip num">203.0.113.42</div>
+        </div>
+        <div class="wan">
+          <div class="name">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1.5 10.5 7H7.5v3.5h-3V7H1.5z" fill="#7ee787"/></svg>
+            WAN2 <em>LTE · standby</em>
+          </div>
+          <div class="stats num"><span><b>38</b><small>ms</small></span><span><b>0.4</b><small>% loss</small></span></div>
+          <div class="ip num">198.51.100.17</div>
+        </div>
+        <div class="net-spark">
+          <div class="cap"><span>WAN1 latency · last 60 min</span><span class="num">min 9 · max 21 ms</span></div>
+          <svg viewBox="0 0 300 56" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="netFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#58a6ff" stop-opacity=".18"/>
+                <stop offset="1" stop-color="#58a6ff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <polygon points="0,36 15,38 30,34 45,37 60,35 75,30 90,36 105,39 120,33 135,14 150,28 165,35 180,37 195,34 210,36 225,38 240,33 255,35 270,37 285,34 300,35 300,56 0,56" fill="url(#netFill)"/>
+            <polyline points="0,36 15,38 30,34 45,37 60,35 75,30 90,36 105,39 120,33 135,14 150,28 165,35 180,37 195,34 210,36 225,38 240,33 255,35 270,37 285,34 300,35" fill="none" stroke="#58a6ff" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="data-today">
+          <span>Data today</span>
+          <span><b class="num">4.2 GB</b> <span class="muted num" style="font-size:12px;margin-left:6px">↓ 3.6 · ↑ 0.6</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- YouTube player bar: swap the <div class="yt-thumb"> for an iframe to actually play
+         <iframe width="0" height="0" src="https://www.youtube.com/embed/VIDEO_ID?autoplay=1" allow="autoplay"></iframe> -->
+    <section class="card player">
+      <div class="yt-thumb">
+        <svg viewBox="0 0 24 24"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#ff0033"/><path d="M10 9.4v5.2l4.6-2.6z" fill="#fff"/></svg>
+      </div>
+      <div class="yt-meta">
+        <b>Midnight Build Session — Side A</b>
+        <span>YouTube Music · queued from your playlist</span>
+      </div>
+      <div class="eq"><i></i><i></i><i></i><i></i></div>
+      <div class="pctl">
+        <button aria-label="Previous"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 4h2v12H5zM16 4v12l-9-6z"/></svg></button>
+        <button class="play" aria-label="Pause"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 4h3v12H6zM11 4h3v12h-3z"/></svg></button>
+        <button aria-label="Next"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 4h2v12h-2zM4 4l9 6-9 6z"/></svg></button>
+      </div>
+      <div class="prog">
+        <span class="num mono">1:24</span>
+        <div class="bar"><i></i></div>
+        <span class="num mono">3:56</span>
+      </div>
+      <div class="vol">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l4-3v10l-4-3H4z"/><path d="M14 7.5a4 4 0 0 1 0 5"/></svg>
+        <div class="bar"><i></i></div>
+      </div>
+      <div class="yt-queue">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h11M3 10h11M3 14h7"/><path d="M16 10v5l3-2.5z" fill="currentColor" stroke="none"/></svg>
+        12 in queue
+      </div>
+    </section>
+  </main>
+</div>
 <script>
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  var els = document.querySelectorAll('.rv');
-  if (!('IntersectionObserver' in window)) {
-    els.forEach(function (e) { e.classList.add('in'); });
-  } else {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    els.forEach(function (e) { io.observe(e); });
+(function () {
+  var el = document.querySelector('.app');
+  function fit() {
+    if (window.innerWidth <= 860) { el.style.transform = 'none'; el.style.left = '0'; el.style.top = '0'; return; }
+    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 1000);
+    el.style.transform = 'scale(' + s + ')';
+    el.style.left = Math.max(0, (window.innerWidth - 1600 * s) / 2) + 'px';
+    el.style.top = Math.max(0, (window.innerHeight - 1000 * s) / 2) + 'px';
   }
-  window.__errs = [];
-  window.addEventListener('error', function (e) { window.__errs.push(String(e.message)); });
+  window.addEventListener('resize', fit);
+  fit();
+})();
 </script>
 </body>
 </html>
