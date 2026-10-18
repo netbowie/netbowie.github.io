@@ -109,6 +109,7 @@
   .ok{color:var(--green);background:rgba(126,231,135,.09)}
   .warn{color:var(--amber);background:rgba(242,184,128,.1)}
   .fail{color:var(--red);background:rgba(255,123,114,.1)}
+  .run{color:var(--blue);background:rgba(88,166,255,.1)}
 
   /* Network */
   .wan{display:grid;grid-template-columns:1fr auto;row-gap:3px;padding:10px 0;border-bottom:1px solid #1a212b}
@@ -179,9 +180,23 @@
     .yt-meta{width:auto;flex:1 1 150px}
     .prog{order:6;flex:1 1 100%}
     .yt-queue{display:none}
+    .yt-stage{position:fixed;right:14px;left:14px;width:auto;height:0;padding-bottom:56.25%;bottom:96px}
+    .yt-stage #yt-player,.yt-stage iframe{position:absolute;inset:0;width:100%;height:100%}
     table{font-size:12px}
     td{height:38px}
   }
+
+  /* YouTube: real embed */
+  .yt-thumb{position:relative;padding:0;overflow:hidden;cursor:pointer}
+  .yt-thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:.9}
+  .yt-thumb .playmark{position:absolute;inset:0;display:grid;place-items:center}
+  .yt-thumb .playmark svg{width:22px;height:22px}
+  .pctl button{cursor:pointer}
+  .pctl button:disabled{cursor:default}
+  .yt-stage{position:absolute;right:32px;bottom:96px;width:420px;height:246px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#000;box-shadow:0 20px 48px rgba(0,0,0,.6);display:none;z-index:30}
+  .yt-stage.open{display:block}
+  .yt-stage #yt-player,.yt-stage iframe{width:100%;height:100%;border:0;display:block}
+  .yt-stage .close{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;line-height:1;cursor:pointer}
 </style>
 <body>
 <div class="app">
@@ -346,30 +361,36 @@
       </div>
     </section>
 
-    <!-- YouTube player bar: drop an iframe in place of the thumbnail to make it play -->
+    <!-- YouTube player: real embed, starts at the timestamp in the URL -->
     <section class="card player">
-      <div class="yt-thumb">
-        <svg viewBox="0 0 24 24"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#3a2028"/><path d="M10 9.4v5.2l4.6-2.6z" fill="#8a5a66"/></svg>
+      <div class="yt-thumb" id="yt-thumb">
+        <img id="yt-img" alt="Aso Cafe BGM thumbnail" src="https://i.ytimg.com/vi/ol7oOgyN6cY/hqdefault.jpg" loading="lazy">
+        <span class="playmark">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.55)"/><path d="M9.6 7.8v8.4l7-4.2z" fill="#fff"/></svg>
+        </span>
       </div>
       <div class="yt-meta">
-        <b>No track linked yet</b>
-        <span>Send a YouTube link to enable playback</span>
+        <b id="yt-title" title="【LO_FI ASO】日本で最も美しい田舎、阿蘇。雄大な草原を望むカフェで、美味しい珈琲と優しいJazzに癒される秋の休日。Aso Cafe BGM">Aso Cafe BGM</b>
+        <span id="yt-sub">Kamo Lofi · YouTube · from 1:24:04</span>
       </div>
+      <div class="eq" id="yt-eq"><i></i><i></i><i></i><i></i></div>
       <div class="pctl">
-        <button aria-label="Previous" disabled><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 4h2v12H5zM16 4v12l-9-6z"/></svg></button>
-        <button class="play" aria-label="Play" disabled style="background:#1b2430;color:#5c6a7a"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 4l9 6-9 6z"/></svg></button>
-        <button aria-label="Next" disabled><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 4h2v12h-2zM4 4l9 6-9 6z"/></svg></button>
+        <button id="yt-prev" aria-label="Back 10 seconds"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 4h2v12H5zM16 4v12l-9-6z"/></svg></button>
+        <button class="play" id="yt-toggle" aria-label="Play"><svg id="yt-icon-play" viewBox="0 0 20 20" fill="currentColor"><path d="M7 4l9 6-9 6z"/></svg></button>
+        <button id="yt-next" aria-label="Forward 10 seconds"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 4h2v12h-2zM4 4l9 6-9 6z"/></svg></button>
       </div>
       <div class="prog">
-        <span class="num mono">0:00</span>
-        <div class="bar"><i style="right:100%"></i></div>
-        <span class="num mono">0:00</span>
+        <span class="num mono" id="yt-cur">1:24:04</span>
+        <div class="bar" id="yt-seek"><i id="yt-prog" style="right:100%"></i></div>
+        <span class="num mono" id="yt-dur">1:24:04</span>
       </div>
       <div class="vol">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l4-3v10l-4-3H4z"/><path d="M14 7.5a4 4 0 0 1 0 5"/></svg>
-        <div class="bar"><i style="right:70%"></i></div>
+        <div class="bar" id="yt-vol"><i id="yt-volfill" style="right:40%"></i></div>
       </div>
-      <div class="yt-queue">no queue</div>
+      <div class="yt-queue" id="yt-queue">default track</div>
+      <div class="yt-stage" id="yt-stage"><div id="yt-player"></div>
+        <button class="close" id="yt-close" aria-label="Close player">✕</button></div>
     </section>
   </main>
 </div>
@@ -537,11 +558,13 @@
       el("dot-jobs").style.background = "var(--muted)";
       return;
     }
-    var cls = { ok: "ok", success: "ok", completed: "ok", warn: "warn", failed: "fail", fail: "fail", error: "fail" };
+    var cls = { ok: "ok", success: "ok", completed: "ok", warn: "warn",
+                running: "run", queued: "run", pending: "run",
+                failed: "fail", fail: "fail", error: "fail" };
     tb.innerHTML = jobs.map(function (j) {
       var k = String(j.status || "").toLowerCase();
       var c = cls[k] || "warn";
-      var label = c === "ok" ? "OK" : (c === "warn" ? "WARN" : "FAILED");
+      var label = c === "ok" ? "OK" : (c === "warn" ? "WARN" : (c === "run" ? "RUNNING" : "FAILED"));
       return '<tr>' +
         '<td><div class="job"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2" stroke-linecap="round"/></svg>' + j.name + '</div></td>' +
         '<td class="muted num">' + (j.schedule || "—") + '</td>' +
@@ -552,7 +575,8 @@
     el("jobs-meta").textContent = jobs.length + " tracked";
     el("k-jobs").textContent = String(jobs.length);
     var bad = jobs.filter(function (j) { return /fail|error/.test(String(j.status || "").toLowerCase()); }).length;
-    el("k-jobs-sub").textContent = bad ? bad + " failed" : "last " + ago(jobs[0].last_run);
+    var live = jobs.filter(function (j) { return /running|queued|pending/.test(String(j.status || "").toLowerCase()); }).length;
+    el("k-jobs-sub").textContent = bad ? bad + " failed" : (live ? live + " running" : "last " + ago(jobs[0].last_run));
     el("dot-jobs").style.background = bad ? "var(--amber)" : "var(--green)";
   }
 
@@ -672,6 +696,135 @@
   setInterval(load, 60000);
   setInterval(tick, 10000);
   tick();
+})();
+</script>
+
+<script>
+(function () {
+  var VID = "ol7oOgyN6cY", START = 5044;       // default track, starts at 1:24:04
+  var stage = document.getElementById("yt-stage");
+  var holder = document.getElementById("yt-player");
+  var thumb = document.getElementById("yt-thumb");
+  var toggle = document.getElementById("yt-toggle");
+  var icon = document.getElementById("yt-icon-play");
+  var eq = document.getElementById("yt-eq");
+  var curEl = document.getElementById("yt-cur");
+  var durEl = document.getElementById("yt-dur");
+  var prog = document.getElementById("yt-prog");
+  var seek = document.getElementById("yt-seek");
+  var vol = document.getElementById("yt-vol");
+  var volfill = document.getElementById("yt-volfill");
+  var player = null, ready = false, apiState = 0, timer = null, wantPlay = false;
+
+  function fmt(t) {
+    t = Math.max(0, Math.floor(t || 0));
+    var h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+    var mm = h ? String(m).padStart(2, "0") : String(m);
+    return (h ? h + ":" : "") + mm + ":" + String(s).padStart(2, "0");
+  }
+  function setPlayingUI(on) {
+    eq.style.opacity = on ? "1" : ".3";
+    icon.innerHTML = on
+      ? '<path d="M6 4h3v12H6zM11 4h3v12h-3z"/>'
+      : '<path d="M7 4l9 6-9 6z"/>';
+    toggle.setAttribute("aria-label", on ? "Pause" : "Play");
+    thumb.style.opacity = on ? ".55" : "1";
+  }
+  function startTicker() {
+    if (timer) return;
+    timer = setInterval(function () {
+      if (!ready || !player) return;
+      var t = player.getCurrentTime() || 0, d = player.getDuration() || 0;
+      curEl.textContent = fmt(t);
+      if (d) durEl.textContent = fmt(d);
+      prog.style.right = "auto";
+      prog.style.width = (d ? (t / d) * 100 : 0).toFixed(2) + "%";
+    }, 500);
+  }
+  function onReady(e) {
+    ready = true;
+    durEl.textContent = fmt(player.getDuration());
+    curEl.textContent = fmt(START);
+    startTicker();
+    if (wantPlay) { player.playVideo(); wantPlay = false; }
+  }
+  function onState(e) {
+    apiState = e.data;
+    setPlayingUI(e.data === 1);
+  }
+  function initPlayer() {
+    if (player) return;
+    player = new YT.Player(holder, {
+      height: "100%", width: "100%", videoId: VID,
+      playerVars: { start: START, playsinline: 1, rel: 0, modestbranding: 1 },
+      events: { onReady: onReady, onStateChange: onState }
+    });
+  }
+  function loadApi(done) {
+    if (window.YT && window.YT.Player) return done(true);
+    var finished = false;
+    var finish = function (ok) { if (finished) return; finished = true; done(ok); };
+    window.onYouTubeIframeAPIReady = function () { finish(true); };
+    var tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    tag.onerror = function () { finish(false); };
+    document.head.appendChild(tag);
+    setTimeout(function () { finish(!!(window.YT && window.YT.Player)); }, 9000);
+  }
+  function fallbackEmbed() {
+    holder.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + VID +
+      '?start=' + START + '&autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+    setPlayingUI(true);
+    durEl.textContent = "—";
+  }
+  function openAndPlay() {
+    stage.classList.add("open");
+    wantPlay = true;
+    if (player) { player.playVideo(); return; }
+    loadApi(function (ok) {
+      if (!ok) { fallbackEmbed(); return; }
+      initPlayer();
+    });
+  }
+  function togglePlay() {
+    if (!stage.classList.contains("open")) { openAndPlay(); return; }
+    if (!ready || !player) { openAndPlay(); return; }
+    if (player.getPlayerState() === 1) { player.pauseVideo(); setPlayingUI(false); }
+    else { player.playVideo(); setPlayingUI(true); }
+  }
+  function nudge(delta) {
+    if (!ready || !player) { openAndPlay(); return; }
+    player.seekTo(Math.max(0, (player.getCurrentTime() || 0) + delta), true);
+  }
+
+  toggle.addEventListener("click", togglePlay);
+  thumb.addEventListener("click", togglePlay);
+  document.getElementById("yt-prev").addEventListener("click", function () { nudge(-10); });
+  document.getElementById("yt-next").addEventListener("click", function () { nudge(10); });
+
+  seek.addEventListener("click", function (e) {
+    if (!ready || !player) return;
+    var r = seek.getBoundingClientRect();
+    var frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    player.seekTo(frac * (player.getDuration() || 0), true);
+  });
+  vol.addEventListener("click", function (e) {
+    var r = vol.getBoundingClientRect();
+    var frac = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    volfill.style.right = "auto";
+    volfill.style.width = (frac * 100).toFixed(0) + "%";
+    if (ready && player) player.setVolume(frac * 100);
+  });
+
+  document.getElementById("yt-close").addEventListener("click", function (e) {
+    e.stopPropagation();
+    stage.classList.remove("open");
+    if (ready && player) player.pauseVideo();
+    setPlayingUI(false);
+  });
+
+  setPlayingUI(false);
+  curEl.textContent = fmt(START);
 })();
 </script>
 </body>
