@@ -3,7 +3,7 @@
 Dashboard pemantauan PC ini, dengan data yang benar-benar diukur dari mesinnya.
 
 - **Situs live:** https://netbowie.github.io/
-- **`index.html` — LUNA 26 · Overview**: dashboard pemantauan tumpukan agen AI lokal dengan **data nyata**: load CPU, RAM, disk, daya BLUETTI (BLE), latensi jaringan, dan riwayat tugas Hermes. Skala 1600×1000 diturunkan otomatis agar pas di layar lebar; di ponsel tata letaknya menumpuk (reflow).
+- **`index.html` — LUNA 26 · Overview**: dashboard pemantauan tumpukan agen AI lokal dengan **data nyata**: load CPU, RAM, disk, daya BLUETTI (BLE), latensi jaringan, dan riwayat tugas Hermes. Di bawah ada pemutar YouTube **audio saja** (iframe dipasang off-screen, jadi lagu berbunyi tanpa panel video). Skala 1600×1000 diturunkan otomatis agar pas di layar lebar; di ponsel tata letaknya menumpuk (reflow).
 - **`lama.html`**: landing page lama (hero, tentang, proyek, tumpukan, kontak) — disimpan sebagai arsip, tidak lagi menjadi halaman utama.
 - **`ruang/`**: kantor virtual agen 3D (three.js, di-vendor lokal). Tautan "Kantor 3D" di bilah atas `index.html` menuju halaman ini.
 - **`og.png`**: gambar pratinjau tautan 1600×1000 untuk `og:image`.

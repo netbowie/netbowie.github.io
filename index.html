@@ -180,8 +180,6 @@
     .yt-meta{width:auto;flex:1 1 150px}
     .prog{order:6;flex:1 1 100%}
     .yt-queue{display:none}
-    .yt-stage{position:fixed;right:14px;left:14px;width:auto;height:0;padding-bottom:56.25%;bottom:96px}
-    .yt-stage #yt-player,.yt-stage iframe{position:absolute;inset:0;width:100%;height:100%}
     table{font-size:12px}
     td{height:38px}
   }
@@ -193,10 +191,9 @@
   .yt-thumb .playmark svg{width:22px;height:22px}
   .pctl button{cursor:pointer}
   .pctl button:disabled{cursor:default}
-  .yt-stage{position:absolute;right:32px;bottom:96px;width:420px;height:246px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#000;box-shadow:0 20px 48px rgba(0,0,0,.6);display:none;z-index:30}
-  .yt-stage.open{display:block}
-  .yt-stage #yt-player,.yt-stage iframe{width:100%;height:100%;border:0;display:block}
-  .yt-stage .close{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:13px;line-height:1;cursor:pointer}
+  /* audio-only: the player stays mounted but off-screen, so playback continues unseen */
+  .yt-stage{position:fixed;left:-10000px;top:0;width:320px;height:180px;opacity:0;pointer-events:none;border:0;background:#000;z-index:-1}
+  .yt-stage #yt-player,.yt-stage iframe{width:320px;height:180px;border:0;display:block}
 </style>
 <body>
 <div class="app">
@@ -389,8 +386,7 @@
         <div class="bar" id="yt-vol"><i id="yt-volfill" style="right:40%"></i></div>
       </div>
       <div class="yt-queue" id="yt-queue">default track</div>
-      <div class="yt-stage" id="yt-stage"><div id="yt-player"></div>
-        <button class="close" id="yt-close" aria-label="Close player">✕</button></div>
+      <div class="yt-stage" id="yt-stage"><div id="yt-player"></div></div>
     </section>
   </main>
 </div>
@@ -778,7 +774,6 @@
     durEl.textContent = "—";
   }
   function openAndPlay() {
-    stage.classList.add("open");
     wantPlay = true;
     if (player) { player.playVideo(); return; }
     loadApi(function (ok) {
@@ -787,7 +782,6 @@
     });
   }
   function togglePlay() {
-    if (!stage.classList.contains("open")) { openAndPlay(); return; }
     if (!ready || !player) { openAndPlay(); return; }
     if (player.getPlayerState() === 1) { player.pauseVideo(); setPlayingUI(false); }
     else { player.playVideo(); setPlayingUI(true); }
@@ -814,13 +808,6 @@
     volfill.style.right = "auto";
     volfill.style.width = (frac * 100).toFixed(0) + "%";
     if (ready && player) player.setVolume(frac * 100);
-  });
-
-  document.getElementById("yt-close").addEventListener("click", function (e) {
-    e.stopPropagation();
-    stage.classList.remove("open");
-    if (ready && player) player.pauseVideo();
-    setPlayingUI(false);
   });
 
   setPlayingUI(false);
