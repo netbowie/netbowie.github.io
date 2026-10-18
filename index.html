@@ -183,7 +183,6 @@
     td{height:38px}
   }
 </style>
-</head>
 <body>
 <div class="app">
   <main class="main">
@@ -208,13 +207,8 @@
       </nav>
       <div class="spacer"></div>
       <a class="ghost" href="/ruang/">Kantor 3D <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13 13 7M8 7h5v5"/></svg></a>
-      <div class="search">
-        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9" r="6"/><path d="m13.5 13.5 4 4"/></svg>
-        Search agents, jobs…<kbd>Ctrl K</kbd>
-      </div>
       <div class="iconbtn">
         <svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8a5 5 0 0 1 10 0c0 4.5 2 6 2 6H3s2-1.5 2-6Z"/><path d="M8.3 17a1.9 1.9 0 0 0 3.4 0"/></svg>
-        <span class="badge num">2</span>
       </div>
       <div class="avatar">BB</div>
     </header>
@@ -222,270 +216,462 @@
     <!-- Page head -->
     <div class="pagehead">
       <h1>Overview</h1>
-      <div class="sub">Local stack · bowie-desktop</div>
-      <span class="chip">sample data</span>
+      <div class="sub">Local stack · <span id="host">—</span></div>
+      <span class="chip" id="status-chip" style="border-color:#2a3340">connecting</span>
       <div class="spacer"></div>
-      <div class="live"><span class="pulse"></span>last update 4s ago</div>
+      <div class="live"><span class="pulse" id="live-dot"></span><span id="updated">loading…</span></div>
     </div>
 
     <!-- KPIs -->
     <section class="kpis">
       <div class="card kpi">
-        <div class="label">CPU temp <span class="dot" style="background:var(--green)"></span></div>
-        <div class="value num">58<small>°C</small></div>
-        <div class="subl">limit 85 · normal</div>
-        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,15 10,14 20,16 30,13 40,12 50,14 60,9 70,11 80,8 90,10 100,9 110,11 120,10" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+        <div class="label">CPU load <span class="dot" id="dot-cpu" style="background:var(--green)"></span></div>
+        <div class="value num"><span id="k-cpu">—</span><small>%</small></div>
+        <div class="subl mono" id="k-cpu-sub">reading…</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none" id="sp-cpu"></svg>
       </div>
       <div class="card kpi">
         <div class="label">RAM <span class="dot" style="background:var(--green)"></span></div>
-        <div class="value num">41.2<small>/ 64 GB</small></div>
-        <div class="subl">64% · normal</div>
-        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,14 10,14 20,13 30,13 40,11 50,11 60,10 70,9 80,9 90,8 100,7 110,8 120,7" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+        <div class="value num"><span id="k-ram">—</span><small>%</small></div>
+        <div class="subl mono" id="k-ram-sub">reading…</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none" id="sp-ram"></svg>
       </div>
       <div class="card kpi">
-        <div class="label">Disk free <span class="dot" style="background:var(--green)"></span></div>
-        <div class="value num">212<small>GB</small></div>
-        <div class="subl">C: drive · normal</div>
-        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,6 20,6 30,7 50,7 60,8 80,9 90,9 100,10 120,11" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+        <div class="label">Disk free <span class="dot" id="dot-disk" style="background:var(--green)"></span></div>
+        <div class="value num"><span id="k-disk">—</span><small>GB</small></div>
+        <div class="subl mono" id="k-disk-sub">C: drive</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,16 20,16 40,16 60,16 80,16 100,16 120,16" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity=".35"/></svg>
       </div>
       <div class="card kpi">
-        <div class="label">Battery <span class="dot" style="background:var(--green)"></span></div>
-        <div class="value num">100<small>%</small></div>
-        <div class="subl">passthrough · BLUETTI AC180P</div>
-        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,12 10,10 20,8 30,6 40,4 50,3 120,3" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+        <div class="label">Battery <span class="dot" id="dot-batt" style="background:var(--green)"></span></div>
+        <div class="value num"><span id="k-batt">—</span><small>%</small></div>
+        <div class="subl mono" id="k-batt-sub">BLUETTI</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,16 20,16 40,16 60,16 80,16 100,16 120,16" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity=".35"/></svg>
       </div>
       <div class="card kpi">
-        <div class="label">Agents <span class="dot" style="background:var(--amber)"></span></div>
-        <div class="value num">11<small>/ 12</small></div>
-        <div class="subl warn-t">1 failed job · warning</div>
-        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,5 60,5 70,5 80,5 90,5 95,14 120,14" fill="none" stroke="#f2b880" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+        <div class="label">Jobs <span class="dot" id="dot-jobs" style="background:var(--green)"></span></div>
+        <div class="value num" id="k-jobs">—</div>
+        <div class="subl mono" id="k-jobs-sub">no runs yet</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,16 20,16 40,16 60,16 80,16 100,16 120,16" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity=".35"/></svg>
       </div>
       <div class="card kpi">
-        <div class="label">Models loaded <span class="dot" style="background:var(--green)"></span></div>
-        <div class="value num">2</div>
-        <div class="subl mono">qwen3:8b · qwen3-4b</div>
-        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,16 25,16 30,10 55,10 60,4 85,4 90,10 100,10 105,10 110,10 120,10" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>
+        <div class="label">Models <span class="dot" id="dot-models" style="background:var(--green)"></span></div>
+        <div class="value num" id="k-models">—</div>
+        <div class="subl mono" id="k-models-sub">ollama</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,16 20,16 40,16 60,16 80,16 100,16 120,16" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity=".35"/></svg>
       </div>
       <div class="card kpi">
         <div class="label">Uptime <span class="dot" style="background:var(--green)"></span></div>
-        <div class="value num">6d 14h</div>
-        <div class="subl mono">since 12 Oct · 1 restart</div>
-        <svg viewBox="0 0 116 22" preserveAspectRatio="none"><rect x="0.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="8.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="17.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="25.5" y="15" width="6" height="7" rx="1.5" fill="#7ee787" opacity="0.45"/><rect x="34.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="42.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="51.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="59.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="68.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="76.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="85.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="93.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="102.0" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/><rect x="110.5" y="6" width="6" height="16" rx="1.5" fill="#7ee787" opacity="0.9"/></svg>
+        <div class="value num" id="k-up">—</div>
+        <div class="subl mono" id="k-up-sub">since boot</div>
+        <svg viewBox="0 0 120 22" preserveAspectRatio="none"><polyline points="0,6 20,6 40,6 60,6 80,6 100,6 120,6" fill="none" stroke="#7ee787" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity=".55"/></svg>
       </div>
     </section>
 
-    <!-- Middle row -->
+    <!-- Charts -->
     <section class="row">
       <div class="card">
         <div class="card-h">
-          <h2>System load — last 24h</h2>
+          <h2>System load — collected history</h2>
           <div class="meta">
-            <span class="legend"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#7ee787" stroke-width="2"/></svg>CPU load %</span>
-            <span class="legend"><svg width="18" height="8"><line x1="0" y1="4" x2="18" y2="4" stroke="#58a6ff" stroke-width="2" stroke-dasharray="4 3"/></svg>RAM used %</span>
+            <span class="legend"><span class="dot" style="background:var(--green)"></span>CPU %</span>
+            <span class="legend"><span class="dot" style="background:var(--blue)"></span>RAM %</span>
+            <span class="num" id="hist-count">0 samples</span>
           </div>
         </div>
-        <svg class="chart" viewBox="0 0 820 214" preserveAspectRatio="xMidYMid meet">
+        <svg class="chart" id="loadchart" viewBox="0 0 820 206">
           <defs>
-            <linearGradient id="cpuFill" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="gCpu" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stop-color="#7ee787" stop-opacity=".22"/>
               <stop offset="1" stop-color="#7ee787" stop-opacity="0"/>
             </linearGradient>
           </defs>
-          <!-- gridlines -->
-          <g stroke="#1c232d" stroke-width="1">
-            <line x1="40" y1="10" x2="800" y2="10"/>
-            <line x1="40" y1="55" x2="800" y2="55"/>
-            <line x1="40" y1="100" x2="800" y2="100"/>
-            <line x1="40" y1="145" x2="800" y2="145"/>
-            <line x1="40" y1="190" x2="800" y2="190" stroke="#26303c"/>
-          </g>
-          <g text-anchor="end">
-            <text x="32" y="14">100%</text>
-            <text x="32" y="59">75%</text>
-            <text x="32" y="104">50%</text>
-            <text x="32" y="149">25%</text>
-            <text x="32" y="194">0%</text>
-          </g>
-          <g text-anchor="middle">
-            <text x="40" y="210" text-anchor="start">00:00</text>
-            <text x="230" y="210">06:00</text>
-            <text x="420" y="210">12:00</text>
-            <text x="610" y="210">18:00</text>
-            <text x="800" y="210" text-anchor="end">24:00</text>
-          </g>
-          <!-- CPU fill + line -->
-          <path d="M40 157.6 Q103.3 168.4 135 170.2 Q166.7 172 198.3 146.8 Q230 121.6 261.7 132.4 Q293.3 143.2 325 139.6 Q356.7 136 388.3 123.4 Q420 110.8 451.7 118 Q483.3 125.2 515 110.8 Q546.7 96.4 578.3 107.2 Q610 118 641.7 112.6 Q673.3 107.2 699.7 118 L726 128.8 L726 190 L40 190 Z" fill="url(#cpuFill)"/>
-          <path d="M40 157.6 Q103.3 168.4 135 170.2 Q166.7 172 198.3 146.8 Q230 121.6 261.7 132.4 Q293.3 143.2 325 139.6 Q356.7 136 388.3 123.4 Q420 110.8 451.7 118 Q483.3 125.2 515 110.8 Q546.7 96.4 578.3 107.2 Q610 118 641.7 112.6 Q673.3 107.2 699.7 118 L726 128.8" fill="none" stroke="#7ee787" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- RAM line -->
-          <path d="M40 96.4 Q103.3 98.2 135 98.2 Q166.7 98.2 198.3 91.9 Q230 85.6 261.7 86.5 Q293.3 87.4 325 85.6 Q356.7 83.8 388.3 81.1 Q420 78.4 451.7 79.3 Q483.3 80.2 515 76.6 Q546.7 73 578.3 74.8 Q610 76.6 641.7 73.9 Q673.3 71.2 699.7 73 L726 74.8" fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round"/>
-          <!-- now marker -->
-          <line x1="726" y1="22" x2="726" y2="190" stroke="#7d8898" stroke-width="1" stroke-dasharray="2 3" opacity=".7"/>
-          <rect x="702" y="2" width="48" height="17" rx="5" fill="#1a212b" stroke="#2a3441"/>
-          <text x="726" y="14.5" text-anchor="middle" style="fill:#e8edf3">now</text>
-          <circle cx="726" cy="128.8" r="4" fill="#11151b" stroke="#7ee787" stroke-width="2"/>
-          <circle cx="726" cy="74.8" r="4" fill="#11151b" stroke="#58a6ff" stroke-width="2"/>
-          <text x="736" y="132.5" style="fill:#7ee787">34%</text>
-          <text x="736" y="78.5" style="fill:#58a6ff">64%</text>
         </svg>
       </div>
-
       <div class="card">
         <div class="card-h">
-          <h2>Power — BLUETTI AC180P</h2>
-          <div class="meta mono">1152 Wh</div>
+          <h2>Power — <span id="p-model">BLUETTI</span></h2>
+          <div class="meta mono" id="p-cap">—</div>
         </div>
         <div class="bat">
           <span class="muted">Battery</span>
-          <span class="big num">100<small class="muted" style="font-size:14px;margin-left:3px">%</small></span>
+          <span class="big num"><span id="p-soc">—</span><small class="muted" style="font-size:14px;margin-left:3px">%</small></span>
         </div>
-        <div class="bar"><i></i></div>
-        <div class="kv"><span>Input</span><span class="num">0 W</span></div>
-        <div class="kv"><span>Output</span><span class="num">96 W</span></div>
-        <div class="kv"><span>Runtime</span><span class="num">∞ (grid)</span></div>
-        <div class="status">
+        <div class="bar"><i id="p-bar" style="width:0%"></i></div>
+        <div class="kv"><span>Input</span><span class="num" id="p-in">— W</span></div>
+        <div class="kv"><span>Output</span><span class="num" id="p-out">— W</span></div>
+        <div class="kv"><span>Reported</span><span class="num" id="p-age">—</span></div>
+        <div class="status" id="p-status">
           <svg width="14" height="14" viewBox="0 0 20 20" fill="#7ee787"><path d="M11.5 1 4 11.5h5.5L8 19l8-11h-5.5z"/></svg>
-          GRID ● ONLINE
-          <span class="r num">230 V · 50 Hz</span>
+          <span id="p-status-text">WAITING</span>
+          <span class="r num" id="p-status-right">—</span>
         </div>
       </div>
     </section>
 
-    <!-- Bottom row -->
+    <!-- Jobs + network -->
     <section class="row">
       <div class="card">
         <div class="card-h">
           <h2>Scheduled jobs</h2>
-          <div class="meta"><span class="num">5 jobs · next: weather-sync in 18 min</span></div>
+          <div class="meta"><span class="num" id="jobs-meta">—</span></div>
         </div>
         <table>
           <thead>
-            <tr><th>Job</th><th>Schedule</th><th>Last run</th><th>Duration</th><th>Status</th></tr>
+            <tr><th>Job</th><th>Last run</th><th>Duration</th><th>Status</th></tr>
           </thead>
-          <tbody>
-            <tr>
-              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">morning-brief</span></div></td>
-              <td class="num muted">06:00 daily</td>
-              <td class="num">today 06:00:03</td>
-              <td class="num">41.8 s</td>
-              <td><span class="pill ok">OK</span></td>
-            </tr>
-            <tr>
-              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">weather-sync</span></div></td>
-              <td class="num muted">every 30 min</td>
-              <td class="num">today 21:30:00</td>
-              <td class="num">2.4 s</td>
-              <td><span class="pill ok">OK</span></td>
-            </tr>
-            <tr>
-              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">ups-log</span></div></td>
-              <td class="num muted">every 5 min</td>
-              <td class="num">today 21:40:00</td>
-              <td class="num">0.6 s</td>
-              <td><span class="pill ok">OK</span></td>
-            </tr>
-            <tr>
-              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">disk-report</span></div></td>
-              <td class="num muted">20:00 daily</td>
-              <td class="num">today 20:00:01</td>
-              <td class="num">11.2 s</td>
-              <td><span class="pill warn">WARN</span></td>
-            </tr>
-            <tr>
-              <td><div class="job"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="7.5"/><path d="M10 5.5V10l3 2"/></svg><span class="mono">news-digest</span></div></td>
-              <td class="num muted">18:00 daily</td>
-              <td class="num">today 18:00:00</td>
-              <td class="num">120.0 s</td>
-              <td><span class="pill fail">FAILED</span></td>
-            </tr>
+          <tbody id="jobs-body">
+            <tr><td colspan="4" class="muted" style="height:120px;text-align:left">No Hermes cron runs recorded yet.</td></tr>
           </tbody>
         </table>
       </div>
-
       <div class="card">
         <div class="card-h">
           <h2>Network</h2>
-          <div class="meta">dual WAN · failover</div>
+          <div class="meta"><span class="num" id="net-target">1.1.1.1</span></div>
         </div>
         <div class="wan">
-          <div class="name">
-            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1.5 10.5 7H7.5v3.5h-3V7H1.5z" fill="#7ee787"/></svg>
-            WAN1 <em>fiber · primary</em>
+          <div class="name">Internet <em id="net-isp">ping</em></div>
+          <div class="stats">
+            <span><b id="net-lat">—</b><small>ms</small></span>
+            <span><b id="net-loss">—</b><small>% loss</small></span>
           </div>
-          <div class="stats num"><span><b>12</b><small>ms</small></span><span><b>0.0</b><small>% loss</small></span></div>
-          <div class="ip num">203.0.113.42</div>
-        </div>
-        <div class="wan">
-          <div class="name">
-            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1.5 10.5 7H7.5v3.5h-3V7H1.5z" fill="#7ee787"/></svg>
-            WAN2 <em>LTE · standby</em>
-          </div>
-          <div class="stats num"><span><b>38</b><small>ms</small></span><span><b>0.4</b><small>% loss</small></span></div>
-          <div class="ip num">198.51.100.17</div>
+          <div class="ip" id="net-host">local host —</div>
         </div>
         <div class="net-spark">
-          <div class="cap"><span>WAN1 latency · last 60 min</span><span class="num">min 9 · max 21 ms</span></div>
-          <svg viewBox="0 0 300 56" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="netFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#58a6ff" stop-opacity=".18"/>
-                <stop offset="1" stop-color="#58a6ff" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-            <polygon points="0,36 15,38 30,34 45,37 60,35 75,30 90,36 105,39 120,33 135,14 150,28 165,35 180,37 195,34 210,36 225,38 240,33 255,35 270,37 285,34 300,35 300,56 0,56" fill="url(#netFill)"/>
-            <polyline points="0,36 15,38 30,34 45,37 60,35 75,30 90,36 105,39 120,33 135,14 150,28 165,35 180,37 195,34 210,36 225,38 240,33 255,35 270,37 285,34 300,35" fill="none" stroke="#58a6ff" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
-          </svg>
+          <div class="cap"><span>Latency · last samples</span><span id="net-range">—</span></div>
+          <svg id="netspark" viewBox="0 0 300 38" preserveAspectRatio="none"></svg>
         </div>
-        <div class="data-today">
-          <span>Data today</span>
-          <span><b class="num">4.2 GB</b> <span class="muted num" style="font-size:12px;margin-left:6px">↓ 3.6 · ↑ 0.6</span></span>
-        </div>
+        <div class="data-today"><span>Last check</span><b id="net-checked">—</b></div>
       </div>
     </section>
 
-    <!-- YouTube player bar: swap the <div class="yt-thumb"> for an iframe to actually play
-         <iframe width="0" height="0" src="https://www.youtube.com/embed/VIDEO_ID?autoplay=1" allow="autoplay"></iframe> -->
+    <!-- YouTube player bar: drop an iframe in place of the thumbnail to make it play -->
     <section class="card player">
       <div class="yt-thumb">
-        <svg viewBox="0 0 24 24"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#ff0033"/><path d="M10 9.4v5.2l4.6-2.6z" fill="#fff"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="1.5" y="5" width="21" height="14" rx="4" fill="#3a2028"/><path d="M10 9.4v5.2l4.6-2.6z" fill="#8a5a66"/></svg>
       </div>
       <div class="yt-meta">
-        <b>Midnight Build Session — Side A</b>
-        <span>YouTube Music · queued from your playlist</span>
+        <b>No track linked yet</b>
+        <span>Send a YouTube link to enable playback</span>
       </div>
-      <div class="eq"><i></i><i></i><i></i><i></i></div>
       <div class="pctl">
-        <button aria-label="Previous"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 4h2v12H5zM16 4v12l-9-6z"/></svg></button>
-        <button class="play" aria-label="Pause"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 4h3v12H6zM11 4h3v12h-3z"/></svg></button>
-        <button aria-label="Next"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 4h2v12h-2zM4 4l9 6-9 6z"/></svg></button>
+        <button aria-label="Previous" disabled><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5 4h2v12H5zM16 4v12l-9-6z"/></svg></button>
+        <button class="play" aria-label="Play" disabled style="background:#1b2430;color:#5c6a7a"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 4l9 6-9 6z"/></svg></button>
+        <button aria-label="Next" disabled><svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 4h2v12h-2zM4 4l9 6-9 6z"/></svg></button>
       </div>
       <div class="prog">
-        <span class="num mono">1:24</span>
-        <div class="bar"><i></i></div>
-        <span class="num mono">3:56</span>
+        <span class="num mono">0:00</span>
+        <div class="bar"><i style="right:100%"></i></div>
+        <span class="num mono">0:00</span>
       </div>
       <div class="vol">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l4-3v10l-4-3H4z"/><path d="M14 7.5a4 4 0 0 1 0 5"/></svg>
-        <div class="bar"><i></i></div>
+        <div class="bar"><i style="right:70%"></i></div>
       </div>
-      <div class="yt-queue">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h11M3 10h11M3 14h7"/><path d="M16 10v5l3-2.5z" fill="currentColor" stroke="none"/></svg>
-        12 in queue
-      </div>
+      <div class="yt-queue">no queue</div>
     </section>
   </main>
 </div>
 <script>
 (function () {
-  var el = document.querySelector('.app');
-  function fit() {
-    if (window.innerWidth <= 860) { el.style.transform = 'none'; el.style.left = '0'; el.style.top = '0'; return; }
-    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 1000);
-    el.style.transform = 'scale(' + s + ')';
-    el.style.left = Math.max(0, (window.innerWidth - 1600 * s) / 2) + 'px';
-    el.style.top = Math.max(0, (window.innerHeight - 1000 * s) / 2) + 'px';
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var el = function (id) { return document.getElementById(id); };
+  var state = { data: null, fetchedAt: 0 };
+
+  function num(v, digits) {
+    if (v === null || v === undefined || isNaN(v)) return "—";
+    return digits === undefined ? String(Math.round(v)) : Number(v).toFixed(digits);
   }
-  window.addEventListener('resize', fit);
-  fit();
+  function ago(iso) {
+    if (!iso) return "—";
+    var d = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (isNaN(d)) return "—";
+    if (d < 0) d = 0;
+    if (d < 60) return Math.round(d) + "s ago";
+    if (d < 3600) return Math.round(d / 60) + "m ago";
+    if (d < 86400) return (d / 3600).toFixed(1).replace(".0", "") + "h ago";
+    return Math.round(d / 86400) + "d ago";
+  }
+  function up(s) {
+    if (s === null || s === undefined) return "—";
+    var d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    if (d) return d + "d " + h + "h";
+    if (h) return h + "h " + m + "m";
+    return m + "m";
+  }
+  function shortDate(iso) {
+    if (!iso) return "—";
+    var d = new Date(iso);
+    if (isNaN(d)) return "—";
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) + " " +
+           d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function spark(svgId, values, color) {
+    var svg = el(svgId); if (!svg) return;
+    svg.innerHTML = "";
+    var pts = values.filter(function (v) { return v !== null && v !== undefined; });
+    if (pts.length < 2) return;
+    var max = Math.max.apply(null, pts), min = Math.min.apply(null, pts);
+    var span = (max - min) || 1;
+    var d = pts.map(function (v, i) {
+      var x = (i / (pts.length - 1)) * 120;
+      var y = 20 - ((v - min) / span) * 17;
+      return x.toFixed(1) + "," + y.toFixed(1);
+    }).join(" ");
+    var line = document.createElementNS(SVGNS, "polyline");
+    line.setAttribute("points", d);
+    line.setAttribute("fill", "none");
+    line.setAttribute("stroke", color);
+    line.setAttribute("stroke-width", "1.5");
+    line.setAttribute("vector-effect", "non-scaling-stroke");
+    line.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(line);
+  }
+
+  function drawChart(hist) {
+    var svg = el("loadchart"); if (!svg) return;
+    while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild);   // keep <defs>
+    var W = 820, H = 206, L = 34, R = 806, T = 12, B = 172;
+    var pts = hist.filter(function (p) { return p && p.cpu !== null; });
+    for (var g = 0; g <= 4; g++) {
+      var y = B - (g / 4) * (B - T);
+      var ln = document.createElementNS(SVGNS, "line");
+      ln.setAttribute("x1", L); ln.setAttribute("x2", R);
+      ln.setAttribute("y1", y); ln.setAttribute("y2", y);
+      ln.setAttribute("stroke", "#1c2530");
+      svg.appendChild(ln);
+      var tx = document.createElementNS(SVGNS, "text");
+      tx.setAttribute("x", 4); tx.setAttribute("y", y + 3.5);
+      tx.setAttribute("fill", "#7d8898"); tx.setAttribute("font-size", "10.5");
+      tx.textContent = (g * 25) + "%";
+      svg.appendChild(tx);
+    }
+    if (pts.length < 2) {
+      var msg = document.createElementNS(SVGNS, "text");
+      msg.setAttribute("x", (L + R) / 2); msg.setAttribute("y", (T + B) / 2);
+      msg.setAttribute("text-anchor", "middle");
+      msg.setAttribute("fill", "#7d8898"); msg.setAttribute("font-size", "12");
+      msg.textContent = "collecting samples — history builds up every 10 minutes";
+      svg.appendChild(msg);
+      return;
+    }
+    var t0 = new Date(pts[0].t).getTime();
+    var t1 = new Date(pts[pts.length - 1].t).getTime();
+    var tspan = Math.max(t1 - t0, 1);
+    function xAt(p) { return L + ((new Date(p.t).getTime() - t0) / tspan) * (R - L); }
+    function line(key, color, dash, fillId) {
+      var d = pts.map(function (p, i) {
+        var x = xAt(p);
+        var v = Math.max(0, Math.min(100, p[key] || 0));
+        var y = B - (v / 100) * (B - T);
+        return (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+      }).join(" ");
+      if (fillId) {
+        var area = document.createElementNS(SVGNS, "path");
+        area.setAttribute("d", d + " L" + R + " " + B + " L" + L + " " + B + " Z");
+        area.setAttribute("fill", "url(#" + fillId + ")");
+        svg.appendChild(area);
+      }
+      var path = document.createElementNS(SVGNS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", color);
+      path.setAttribute("stroke-width", dash ? "1.5" : "1.8");
+      if (dash) path.setAttribute("stroke-dasharray", "5 4");
+      path.setAttribute("stroke-linejoin", "round");
+      svg.appendChild(path);
+    }
+    line("cpu", "#7ee787", false, "gCpu");
+    line("ram", "#58a6ff", true, null);
+
+    var first = new Date(t0), last = new Date(t1);
+    var fmt = function (d) { return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); };
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var tx = document.createElementNS(SVGNS, "text");
+      tx.setAttribute("x", L + f * (R - L));
+      tx.setAttribute("y", 194);
+      tx.setAttribute("fill", "#7d8898"); tx.setAttribute("font-size", "10.5");
+      tx.setAttribute("text-anchor", f === 0 ? "start" : (f === 1 ? "end" : "middle"));
+      var t = new Date(first.getTime() + f * (last.getTime() - first.getTime()));
+      tx.textContent = fmt(t);
+      svg.appendChild(tx);
+    });
+    var lx = L + ((pts[pts.length - 1].cpu || 0) / 100) * (B - T) * 0;
+    var lastY = B - (Math.max(0, Math.min(100, pts[pts.length - 1].cpu || 0)) / 100) * (B - T);
+    var cx = document.createElementNS(SVGNS, "circle");
+    cx.setAttribute("cx", R); cx.setAttribute("cy", lastY);
+    cx.setAttribute("r", 3.5); cx.setAttribute("fill", "#7ee787");
+    svg.appendChild(cx);
+  }
+
+  function drawNetSpark(hist) {
+    var svg = el("netspark"); if (!svg) return;
+    svg.innerHTML = "";
+    var vals = hist.map(function (p) { return p.lat; }).filter(function (v) { return v !== null && v !== undefined; });
+    if (vals.length < 2) return;
+    var max = Math.max.apply(null, vals) || 1;
+    var d = vals.map(function (v, i) {
+      var x = (i / (vals.length - 1)) * 300;
+      var y = 34 - (v / max) * 28;
+      return (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+    }).join(" ");
+    var path = document.createElementNS(SVGNS, "path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "#58a6ff");
+    path.setAttribute("stroke-width", "1.4");
+    path.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(path);
+    el("net-range").textContent = Math.min.apply(null, vals) + "–" + max + " ms";
+  }
+
+  function renderJobs(jobs) {
+    var tb = el("jobs-body");
+    if (!jobs || !jobs.length) {
+      tb.innerHTML = '<tr><td colspan="4" class="muted" style="height:120px;text-align:left">No Hermes cron runs recorded yet.</td></tr>';
+      el("jobs-meta").textContent = "0 runs";
+      el("k-jobs").textContent = "0";
+      el("k-jobs-sub").textContent = "no runs yet";
+      el("dot-jobs").style.background = "var(--muted)";
+      return;
+    }
+    var cls = { ok: "ok", success: "ok", completed: "ok", warn: "warn", failed: "fail", fail: "fail", error: "fail" };
+    tb.innerHTML = jobs.map(function (j) {
+      var k = String(j.status || "").toLowerCase();
+      var c = cls[k] || "warn";
+      var label = c === "ok" ? "OK" : (c === "warn" ? "WARN" : "FAILED");
+      return '<tr>' +
+        '<td><div class="job"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2" stroke-linecap="round"/></svg>' + j.name + '</div></td>' +
+        '<td class="muted num">' + shortDate(j.last_run) + '</td>' +
+        '<td class="num">' + (j.duration_s === null || j.duration_s === undefined ? "—" : j.duration_s + " s") + '</td>' +
+        '<td><span class="pill ' + c + '">' + label + '</span></td>' +
+      '</tr>';
+    }).join("");
+    el("jobs-meta").textContent = jobs.length + " tracked";
+    el("k-jobs").textContent = String(jobs.length);
+    var bad = jobs.filter(function (j) { return /fail|error/.test(String(j.status || "").toLowerCase()); }).length;
+    el("k-jobs-sub").textContent = bad ? bad + " failed" : "last " + ago(jobs[0].last_run);
+    el("dot-jobs").style.background = bad ? "var(--amber)" : "var(--green)";
+  }
+
+  function render(d) {
+    state.data = d;
+    state.fetchedAt = Date.now();
+    el("host").textContent = d.host || "—";
+
+    el("k-cpu").textContent = num(d.cpu.load);
+    el("k-cpu-sub").textContent = (d.cpu.temp_c !== null ? d.cpu.temp_c + " °C" : "temp n/a") +
+      (d.cpu.cores ? " · " + d.cpu.cores + " threads" : "");
+    spark("sp-cpu", (d.history || []).map(function (p) { return p.cpu; }), "#7ee787");
+
+    el("k-ram").textContent = num(d.ram.pct, 0);
+    el("k-ram-sub").textContent = d.ram.used_gb + " / " + d.ram.total_gb + " GB";
+    spark("sp-ram", (d.history || []).map(function (p) { return p.ram; }), "#58a6ff");
+    el("dot-cpu").style.background = (d.cpu.load > 85) ? "var(--amber)" : "var(--green)";
+
+    el("k-disk").textContent = num(d.disk.free_gb);
+    el("k-disk-sub").textContent = d.disk.pct_free + "% free of " + d.disk.total_gb + " GB";
+    el("dot-disk").style.background = (d.disk.pct_free < 10) ? "var(--red)" : (d.disk.pct_free < 20 ? "var(--amber)" : "var(--green)");
+
+    var p = d.power;
+    if (p) {
+      el("k-batt").textContent = p.soc;
+      el("k-batt-sub").textContent = p.model + (p.input_w ? " · " + p.input_w + " W in" : "");
+      el("dot-batt").style.background = p.soc < 20 ? "var(--amber)" : "var(--green)";
+      el("p-model").textContent = "BLUETTI " + p.model;
+      el("p-cap").textContent = "1152 Wh";
+      el("p-soc").textContent = p.soc;
+      el("p-bar").style.width = p.soc + "%";
+      el("p-bar").style.background = p.soc < 20 ? "var(--amber)" : "var(--green)";
+      el("p-in").textContent = p.input_w + " W";
+      el("p-out").textContent = p.output_w + " W";
+      el("p-age").textContent = ago(d.generated);
+      var chip = el("p-status");
+      chip.style.background = "rgba(126,231,135,.07)";
+      chip.style.borderColor = "rgba(126,231,135,.18)";
+      chip.style.color = "var(--green)";
+      el("p-status-text").textContent = p.input_w > 0 ? "CHARGING / PASS-THROUGH" : "ON BATTERY";
+      el("p-status-right").textContent = "AC " + (p.ac_on ? "ON" : "OFF") + " · DC " + (p.dc_on ? "ON" : "OFF");
+    } else {
+      el("k-batt").textContent = "—";
+      el("k-batt-sub").textContent = "station unreachable";
+      el("dot-batt").style.background = "var(--muted)";
+      el("p-model").textContent = "BLUETTI";
+      el("p-cap").textContent = "—";
+      el("p-soc").textContent = "—";
+      el("p-bar").style.width = "0%";
+      el("p-in").textContent = "— W";
+      el("p-out").textContent = "— W";
+      el("p-age").textContent = "—";
+      el("p-status").style.background = "rgba(255,123,114,.07)";
+      el("p-status").style.borderColor = "rgba(255,123,114,.2)";
+      el("p-status").style.color = "var(--red)";
+      el("p-status-text").textContent = "NO BLE CONNECTION";
+      el("p-status-right").textContent = "close the phone app";
+    }
+
+    el("k-models").textContent = d.ollama.running ? String(d.ollama.models.length) : "0";
+    el("k-models-sub").textContent = d.ollama.running
+      ? (d.ollama.models.length ? d.ollama.models.join(" · ") : "no model loaded")
+      : "ollama stopped";
+    el("dot-models").style.background = d.ollama.running ? "var(--green)" : "var(--muted)";
+
+    el("k-up").textContent = up(d.uptime_s);
+    el("k-up-sub").textContent = d.boot ? "since " + shortDate(d.boot) : "—";
+
+    el("net-lat").textContent = num(d.net.latency_ms);
+    el("net-loss").textContent = num(d.net.loss_pct);
+    el("net-target").textContent = d.net.target;
+    el("net-host").textContent = "local host · " + (d.host || "—");
+    el("net-checked").textContent = ago(d.generated);
+    el("dot-jobs").title = "";
+
+    var hist = d.history || [];
+    el("hist-count").textContent = hist.length + (hist.length === 1 ? " sample" : " samples");
+    drawChart(hist);
+    drawNetSpark(hist);
+    renderJobs(d.jobs);
+    tick();
+
+    var ageMin = (Date.now() - new Date(d.generated).getTime()) / 60000;
+    var chipEl = el("status-chip"), dot = el("live-dot");
+    if (ageMin < 25) {
+      chipEl.textContent = "live"; chipEl.className = "chip ok";
+      chipEl.style.borderColor = ""; dot.style.background = "var(--green)";
+    } else {
+      chipEl.textContent = "stale " + ago(d.generated); chipEl.className = "chip warn";
+      dot.style.background = "var(--amber)";
+    }
+  }
+
+  function tick() {
+    if (!state.data) return;
+    el("updated").textContent = "sampled " + ago(state.data.generated);
+    el("p-age").textContent = ago(state.data.generated);
+    el("net-checked").textContent = ago(state.data.generated);
+  }
+
+  function fail() {
+    var c = el("status-chip");
+    c.textContent = "no data"; c.className = "chip fail";
+    el("updated").textContent = "stats.json unreachable";
+    el("live-dot").style.background = "var(--red)";
+    el("host").textContent = "this page needs stats.json";
+  }
+
+  function load() {
+    fetch("stats.json?t=" + Date.now(), { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(render)
+      .catch(fail);
+  }
+
+  load();
+  setInterval(load, 60000);
+  setInterval(tick, 10000);
+  tick();
 })();
 </script>
 </body>
