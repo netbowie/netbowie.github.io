@@ -10,7 +10,7 @@ Dashboard pemantauan PC ini, dengan data yang benar-benar diukur dari mesinnya.
 
 ## Bagaimana data nyata masuk ke halaman
 
-Halaman ini statis (GitHub Pages), jadi angka diambil dari `stats.json` yang dibuat cron Hermes setiap 10 menit:
+Halaman ini statis (GitHub Pages), jadi angka diambil dari `stats.json` yang dibuat cron Hermes setiap 5 menit:
 
 ```
 tools/collect_stats.py   # sampling PC ini -> stats.json
@@ -27,7 +27,7 @@ tools/refresh_stats.sh   # collect + git commit + git push
 
 Probe yang gagal ditulis `null` dan tampil sebagai `—`; tidak ada angka karangan. Suhu CPU berasal dari zona termal ACPI yang dilaporkan Windows — kalau sensornya tidak ada, kolomnya `temp n/a`.
 
-Grafik "System load" memakai riwayat sampel di `stats.json` (maksimal 288 titik = 48 jam pada interval 10 menit), jadi terisi sendiri seiring waktu.
+Grafik "System load" memakai riwayat sampel di `stats.json` (maksimal 288 titik = 24 jam pada interval 5 menit), jadi terisi sendiri seiring waktu.
 
 ## Cara memperbarui
 

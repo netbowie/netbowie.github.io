@@ -24,7 +24,7 @@ HERMES = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes"
 BLUETTI_PY = Path(r"C:\Users\Bowon\AppData\Local\hermes\cache\scratch\blevenv\Scripts\bluetti-read.exe")
 BLUETTI_MAC = "D7:35:3E:71:D7:DD"
 BLUETTI_TYPE = "AC180P"
-HISTORY_MAX = 288          # 10-minute samples -> 48 h
+HISTORY_MAX = 288          # 5-minute samples -> 24 h
 
 PS_SCRIPT = r"""
 $os  = Get-CimInstance Win32_OperatingSystem
