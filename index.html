@@ -827,5 +827,26 @@
   curEl.textContent = fmt(START);
 })();
 </script>
+
+<script>
+(function () {
+  var board = document.querySelector(".app");
+  function fit() {
+    if (window.innerWidth <= 860) {           // phones: CSS reflow takes over
+      board.style.transform = "none";
+      board.style.left = "0";
+      board.style.top = "0";
+      return;
+    }
+    var s = Math.min(window.innerWidth / 1600, window.innerHeight / 1000);
+    board.style.transform = "scale(" + s + ")";
+    board.style.left = Math.max(0, (window.innerWidth - 1600 * s) / 2) + "px";
+    board.style.top = Math.max(0, (window.innerHeight - 1000 * s) / 2) + "px";
+  }
+  window.addEventListener("resize", fit);
+  window.addEventListener("orientationchange", fit);
+  fit();
+})();
+</script>
 </body>
 </html>
