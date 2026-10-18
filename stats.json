@@ -1,16 +1,16 @@
 {
- "generated": "2026-10-18T21:16:01+07:00",
- "generated_utc": "2026-10-18T14:16:01+00:00",
+ "generated": "2026-10-18T21:20:10+07:00",
+ "generated_utc": "2026-10-18T14:20:10+00:00",
  "host": "A9_Max",
  "cpu": {
-  "load": 7,
+  "load": 0,
   "temp_c": 20.1,
   "cores": 24
  },
  "ram": {
-  "used_gb": 22.7,
+  "used_gb": 22.9,
   "total_gb": 59.6,
-  "pct": 38.1
+  "pct": 38.4
  },
  "disk": {
   "free_gb": 809,
@@ -18,12 +18,12 @@
   "pct_free": 87.0
  },
  "boot": "2026-10-15T22:14:57.1848330+07:00",
- "uptime_s": 255664,
+ "uptime_s": 255913,
  "power": {
   "model": "AC180P",
   "soc": 100,
-  "input_w": 35,
-  "output_w": 32,
+  "input_w": 34,
+  "output_w": 40,
   "ac_on": false,
   "dc_on": false
  },
@@ -40,9 +40,9 @@
   {
    "name": "stats-refresh",
    "schedule": "*/10 * * * *",
-   "status": "completed",
-   "last_run": "2026-10-18T21:11:41.311972+07:00",
-   "duration_s": 16
+   "status": "running",
+   "last_run": "2026-10-18T21:20:09.106948+07:00",
+   "duration_s": null
   }
  ],
  "history": [
@@ -146,6 +146,12 @@
    "t": "2026-10-18T14:16:01+00:00",
    "cpu": 7,
    "ram": 38.1,
+   "lat": 21
+  },
+  {
+   "t": "2026-10-18T14:20:10+00:00",
+   "cpu": 0,
+   "ram": 38.4,
    "lat": 21
   }
  ]
