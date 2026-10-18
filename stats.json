@@ -1,16 +1,16 @@
 {
- "generated": "2026-10-18T21:10:47+07:00",
- "generated_utc": "2026-10-18T14:10:47+00:00",
+ "generated": "2026-10-18T21:11:43+07:00",
+ "generated_utc": "2026-10-18T14:11:43+00:00",
  "host": "A9_Max",
  "cpu": {
-  "load": 1,
+  "load": 21,
   "temp_c": 20.1,
   "cores": 24
  },
  "ram": {
-  "used_gb": 22.3,
+  "used_gb": 22.6,
   "total_gb": 59.6,
-  "pct": 37.4
+  "pct": 37.9
  },
  "disk": {
   "free_gb": 809,
@@ -18,12 +18,12 @@
   "pct_free": 87.0
  },
  "boot": "2026-10-15T22:14:57.1848330+07:00",
- "uptime_s": 255350,
+ "uptime_s": 255406,
  "power": {
   "model": "AC180P",
   "soc": 100,
-  "input_w": 38,
-  "output_w": 38,
+  "input_w": 41,
+  "output_w": 39,
   "ac_on": false,
   "dc_on": false
  },
@@ -33,10 +33,17 @@
  },
  "net": {
   "loss_pct": 0,
-  "latency_ms": 22,
+  "latency_ms": 21,
   "target": "1.1.1.1"
  },
- "jobs": [],
+ "jobs": [
+  {
+   "name": "2cd1f8fe49ae",
+   "status": "running",
+   "last_run": "2026-10-18T21:11:41.311972+07:00",
+   "duration_s": null
+  }
+ ],
  "history": [
   {
    "t": "2026-10-18T14:04:21+00:00",
@@ -115,6 +122,12 @@
    "cpu": 1,
    "ram": 37.4,
    "lat": 22
+  },
+  {
+   "t": "2026-10-18T14:11:43+00:00",
+   "cpu": 21,
+   "ram": 37.9,
+   "lat": 21
   }
  ]
 }
