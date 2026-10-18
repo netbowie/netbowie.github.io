@@ -121,10 +121,16 @@ def jobs() -> list[dict]:
         return []
     try:
         con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+        # prefer the last *finished* run per job; a run in flight is noise
         rows = con.execute(
             "select job_id, status, started_at, finished_at from executions "
-            "order by rowid desc limit 40"
+            "where status != 'running' order by rowid desc limit 40"
         ).fetchall()
+        if not rows:
+            rows = con.execute(
+                "select job_id, status, started_at, finished_at from executions "
+                "order by rowid desc limit 10"
+            ).fetchall()
         con.close()
     except Exception:
         return []
