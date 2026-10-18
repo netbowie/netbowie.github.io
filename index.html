@@ -318,7 +318,7 @@
         </div>
         <table>
           <thead>
-            <tr><th>Job</th><th>Last run</th><th>Duration</th><th>Status</th></tr>
+            <tr><th>Job</th><th>Schedule</th><th>Last run</th><th>Status</th></tr>
           </thead>
           <tbody id="jobs-body">
             <tr><td colspan="4" class="muted" style="height:120px;text-align:left">No Hermes cron runs recorded yet.</td></tr>
@@ -544,8 +544,8 @@
       var label = c === "ok" ? "OK" : (c === "warn" ? "WARN" : "FAILED");
       return '<tr>' +
         '<td><div class="job"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l3 2" stroke-linecap="round"/></svg>' + j.name + '</div></td>' +
-        '<td class="muted num">' + shortDate(j.last_run) + '</td>' +
-        '<td class="num">' + (j.duration_s === null || j.duration_s === undefined ? "—" : j.duration_s + " s") + '</td>' +
+        '<td class="muted num">' + (j.schedule || "—") + '</td>' +
+        '<td class="num">' + shortDate(j.last_run) + '</td>' +
         '<td><span class="pill ' + c + '">' + label + '</span></td>' +
       '</tr>';
     }).join("");

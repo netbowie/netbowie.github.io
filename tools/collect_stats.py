@@ -102,7 +102,20 @@ def bluetti() -> dict | None:
     }
 
 
+def job_names() -> dict:
+    """id -> (name, cron display) from Hermes' job definitions."""
+    p = HERMES / "cron" / "jobs.json"
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+        return {j["id"]: (j.get("name") or j["id"],
+                          (j.get("schedule") or {}).get("display") or "")
+                for j in data.get("jobs", [])}
+    except Exception:
+        return {}
+
+
 def jobs() -> list[dict]:
+    names = job_names()
     db = HERMES / "cron" / "executions.db"
     if not db.exists():
         return []
@@ -127,7 +140,8 @@ def jobs() -> list[dict]:
         except Exception:
             pass
         out.append({
-            "name": job_id.split(":")[-1][:28],
+            "name": names.get(job_id, (job_id[:10], ""))[0],
+            "schedule": names.get(job_id, ("", ""))[1],
             "status": (status or "unknown").lower(),
             "last_run": started,
             "duration_s": dur,
