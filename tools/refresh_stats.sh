@@ -26,7 +26,13 @@ if git diff --cached --quiet; then
 fi
 
 last="$(git log -1 --pretty=%s)"
-if [[ "$last" == stats:* ]] && [ "$(git rev-parse HEAD^)" = "$(git rev-parse origin/main)" ]; then
+head_sha="$(git rev-parse HEAD)"
+origin_sha="$(git rev-parse origin/main)"
+parent_sha="$(git rev-parse HEAD^)"
+# Amend only when HEAD is our own stats commit sitting on/at origin/main:
+#   already pushed (head == origin)  -> amend + force-with-lease
+#   one ahead, parent == origin      -> amend + normal push
+if [[ "$last" == stats:* ]] && { [ "$head_sha" = "$origin_sha" ] || [ "$parent_sha" = "$origin_sha" ]; }; then
   git commit -q --amend -m "stats: $(date -Iseconds)"
   git push -q --force-with-lease origin main
 else
