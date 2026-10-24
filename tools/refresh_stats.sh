@@ -12,7 +12,19 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$PATH:/c/Program Files/GitHub CLI"
 
-git fetch -q origin main || { echo "fetch failed"; exit 1; }
+# The router's DNS (192.168.0.1) times out in bursts, which is what produced
+# "Could not resolve host github.com" failures — retry the network steps instead
+# of losing a sample to a 30-second blip.
+retry() {
+  local tries=3 delay=15 i=1
+  until "$@"; do
+    [ "$i" -ge "$tries" ] && return 1
+    i=$((i + 1))
+    sleep "$delay"
+  done
+}
+
+retry git fetch -q origin main || echo "fetch failed, continuing with local refs"
 if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
   git reset --hard -q origin/main
 fi
@@ -34,9 +46,9 @@ parent_sha="$(git rev-parse HEAD^)"
 #   one ahead, parent == origin      -> amend + normal push
 if [[ "$last" == stats:* ]] && { [ "$head_sha" = "$origin_sha" ] || [ "$parent_sha" = "$origin_sha" ]; }; then
   git commit -q --amend -m "stats: $(date -Iseconds)"
-  git push -q --force-with-lease origin main
+  retry git push -q --force-with-lease origin main
 else
   git commit -q -m "stats: $(date -Iseconds)"
-  git push -q origin main
+  retry git push -q origin main
 fi
 echo "published $(date -Iseconds)"
